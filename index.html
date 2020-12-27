@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Steam account checker</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body style="background: #333; color: #ddd">
+    <nav>
+        <div class="nav-wrapper red">
+            <a class="brand-logo center">Steam account checker</a>
+            <ul class="right">
+                <li>
+                    <a class="btn-flat waves-effect waves-light modal-trigger white-text" href="#modal1" style="margin: 0;"><i class="large material-icons">add</i></a>
+                </li>
+                <li>
+                    <a class="btn-flat waves-effect waves-light white-text" id="reloadall" style="margin: 0;"><i class="large material-icons">refresh</i></a>
+                </li>
+              </ul>
+        </div>
+    </nav>
+    <table>
+        <thead>
+            <tr>
+                <th>login</th>
+                <th>Name</th>
+                <th>Wins/rank</th>
+                <th>Ban/Error</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+    <div id="modal1" class="modal">
+        <div class="modal-content">
+            <h4 class="center">Add account</h4>
+            <div class="row">
+                <form class="col s12" id="add-acc-form">
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <input id="login" type="text" class="validate">
+                            <label for="login">Login</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <input id="password" type="password" class="validate">
+                            <label for="password">Password</label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <a href="#!" class="modal-close waves-effect waves-light btn red" id="add-account">Add</a>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script>
+        M.AutoInit();
+        const { ipcRenderer, clipboard } = require('electron');
+        var update_cycle = -1;
+        function countdown(s) {
+            const d = Math.floor(s / (3600 * 24));
+            s  -= d * 3600 * 24;
+            const h = Math.floor(s / 3600);
+            s  -= h * 3600;
+            const m = Math.floor(s / 60);
+            s  -= m * 60;
+            const tmp = [];
+            (d) && tmp.push(d + 'd');
+            (d || h) && tmp.push(h + 'h');
+            (d || h || m) && tmp.push(m + 'm');
+            tmp.push(s + 's');
+            return tmp.join(' ');
+        }
+        async function updateAccounts() {
+            clearTimeout(update_cycle);
+            const accounts = await ipcRenderer.invoke('accounts:get');
+            let tbody = document.querySelector('table tbody');
+            for (const username in accounts) {
+                if (Object.hasOwnProperty.call(accounts, username)) {
+                    const account = accounts[username];
+                    let tr = tbody.querySelector('#acc-' + username);
+                    let preloader = '<div class="preloader-wrapper small active"><div class="spinner-layer spinner-red-only"><div class="circle-clipper left"><div class="circle"></div>\
+                        </div><div class="gap-patch"><div class="circle"></div></div><div class="circle-clipper right"><div class="circle"></div></div></div></div>';
+                    let name = account.pending ? preloader : account.name ?? '?';
+                    let rank = account.pending ? preloader : account.wins === -1 ? '-' : (account.wins ?? 0) > 10 ? (account.rank == 0 ? "?" : account.rank) : (account.wins ?? "?");
+                    let ban = account.pending ? preloader : account.error ? account.error : (account.penalty_reason === 0 ? "-" : ((account.penalty_reason ?? '?') 
+                        + ((account.penalty_seconds ?? -1) == -1 ? "" : 
+                            (Date.now() > (account.penalty_seconds * 1000) ? " - Expired" 
+                            : " - " + countdown(account.penalty_seconds - Math.floor(Date.now() / 1000))))));
+                    if(!tr) {
+                        tr = document.createElement('tr');
+                        tr.id = 'acc-' + username;
+                        
+                        let td_username = document.createElement('td');
+                        td_username.innerHTML = username;
+                        let td_name = document.createElement('td');
+                        td_name.innerHTML = name;
+                        let td_rank = document.createElement('td');
+                        td_rank.innerHTML = rank;
+                        let td_ban = document.createElement('td');
+                        td_ban.innerHTML = ban;
+                        let td_action = document.createElement('td');
+                        let a_copy = document.createElement('a');
+                        a_copy.className = "btn-floating btn-small red";
+                        a_copy.innerHTML = '<i class="material-icons">content_copy</i>';
+                        a_copy.addEventListener('click', async e => {
+                            clipboard.writeText(account.password, 'selection');
+                            M.toast({html: 'Copied!', classes: 'green'});
+                        })
+                        let a_refresh = document.createElement('a');
+                        a_refresh.className = "btn-floating btn-small red";
+                        a_refresh.innerHTML = '<i class="material-icons">refresh</i>';
+                        a_refresh.addEventListener('click', async e => {
+                            let promise = ipcRenderer.invoke('accounts:check', username);
+                            updateAccounts();
+                            await promise;
+                            updateAccounts();
+                        });
+                        let a_delete = document.createElement('a');
+                        a_delete.className = "btn-floating btn-small red";
+                        a_delete.innerHTML = '<i class="material-icons">delete</i>';
+                        a_delete.addEventListener('click', async e => {
+                            await ipcRenderer.invoke('accounts:delete', username);
+                            updateAccounts();
+                            tr.remove();
+                        })
+                        td_action.appendChild(a_copy);
+                        td_action.appendChild(a_refresh);
+                        td_action.appendChild(a_delete);
+
+                        tr.appendChild(td_username);
+                        tr.appendChild(td_name);
+                        tr.appendChild(td_rank);
+                        tr.appendChild(td_ban);
+                        tr.appendChild(td_action);
+                        tbody.appendChild(tr);
+                    } else {
+                        let td_name = tr.querySelector("td:nth-child(2)");
+                        if(td_name.innerHTML != name) {
+                            td_name.innerHTML = name;
+                        }
+                        let td_rank = tr.querySelector("td:nth-child(3)");
+                        if(td_rank.innerHTML != rank) {
+                            td_rank.innerHTML = rank;
+                        }
+                        let td_ban = tr.querySelector("td:nth-child(4)");
+                        if(td_ban.innerHTML != ban) {
+                            td_ban.innerHTML = ban;
+                        }
+                    }
+                }
+            }
+            update_cycle = setTimeout(updateAccounts, 500);
+        };
+        updateAccounts();
+        document.querySelector("#add-account").addEventListener("click", async e => {
+            let username = document.querySelector("#login").value.trim();
+            let password = document.querySelector("#password").value.trim();
+            document.querySelector("#login").value = '';
+            document.querySelector("#password").value = '';
+            await ipcRenderer.invoke('accounts:add', username, password);
+            let ret = await ipcRenderer.invoke('accounts:check', username);
+            if(ret.error) {
+                M.toast({html: username + ': ' + ret.error, classes: 'red'});
+            }
+            updateAccounts();
+        });
+        document.querySelector('#reloadall').addEventListener('click', async e => {
+            const accounts = await ipcRenderer.invoke('accounts:get');
+            for (const username in accounts) {
+                if (Object.hasOwnProperty.call(accounts, username)) {
+                    ipcRenderer.invoke('accounts:check', username).then(ret => {
+                        if(ret.error) {
+                            M.toast({html: username + ': ' + ret.error, classes: 'red'});
+                        }
+                    });
+                }
+            }
+            updateAccounts();
+        });
+    </script>
+</body>
+</html>
