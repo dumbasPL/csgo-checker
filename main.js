@@ -20,7 +20,7 @@ var currently_checking = [];
 function createWindow () {
     const win = new BrowserWindow({
         webPreferences: {
-            nodeIntegration: true
+            nodeIntegration: true,
         },
     });
 
@@ -72,7 +72,8 @@ ipcMain.handle("accounts:check", async (event, username) => {
             penalty_reason: res.penalty_reason,
             penalty_seconds: res.penalty_seconds,
             rank: res.rank,
-            wins: res.wins
+            wins: res.wins,
+            lvl: res.lvl
         });
         return res;
     } catch (error) {
@@ -240,19 +241,6 @@ function check_account(username, pass) {
                     let msg = Protos.csgo.CMsgGCCStrike15_v2_MatchmakingGC2ClientHello.decode(payload);
                     msg = Protos.csgo.CMsgGCCStrike15_v2_MatchmakingGC2ClientHello.toObject(msg, { defaults: true });
 
-                    // if(is_permanent_penalty_reason(msg.penalty_reason)) {
-                    //     steamClient.logOff();
-                    //     currently_checking = currently_checking.filter(x => x !== username);
-                    //     resolve({
-                    //         penalty_reason: penalty_reason_string(msg.penalty_reason),
-                    //         penalty_seconds: -1,
-                    //         wins: -1,
-                    //         rank: -1,
-                    //         name: steamClient.accountInfo.name
-                    //     });
-                    //     return;
-                    // }
-
                     if(!AcknowledgedPenalty && msg.penalty_seconds > 0) {
                         let message = Protos.csgo.CMsgGCCStrike15_v2_AcknowledgePenalty.create({
                             acknowledged: 1
@@ -284,11 +272,12 @@ function check_account(username, pass) {
                             currently_checking = currently_checking.filter(x => x !== username);
                             console.log(msg);
                             resolve({ 
-                                penalty_reason: msg.vac_banned ? 'VAC' : penalty_reason_string(msg.penalty_reason),
-                                penalty_seconds: msg.vac_banned ? -1 : msg.penalty_seconds > 0 ? (Math.floor(Date.now() / 1000) + msg.penalty_seconds) : 0,
+                                penalty_reason: steamClient.limitations.communityBanned ? 'Community' : msg.vac_banned ? 'VAC' : penalty_reason_string(msg.penalty_reason),
+                                penalty_seconds: msg.vac_banned || steamClient.limitations.communityBanned ? -1 : msg.penalty_seconds > 0 ? (Math.floor(Date.now() / 1000) + msg.penalty_seconds) : 0,
                                 wins: msg.vac_banned ? -1 : attempts < 5 ? msg.ranking.wins : 0,
                                 rank: msg.vac_banned ? -1 : attempts < 5 ? rank_string(msg.ranking.rank_id) : 0,
-                                name: steamClient.accountInfo.name
+                                name: steamClient.accountInfo.name,
+                                lvl: msg.player_level
                             });
                         }
                         steamClient.logOff();

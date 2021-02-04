@@ -9,7 +9,7 @@
 <body style="background: #333; color: #ddd">
     <nav>
         <div class="nav-wrapper red">
-            <a class="brand-logo center">Steam account checker 1.1</a>
+            <a class="brand-logo center">Steam account checker 0.1.2</a>
             <ul class="right">
                 <li>
                     <a class="btn-flat waves-effect waves-light modal-trigger white-text" href="#modal1" style="margin: 0;"><i class="large material-icons">add</i></a>
@@ -25,6 +25,7 @@
             <tr>
                 <th>login</th>
                 <th>Name</th>
+                <th>Lvl</th>
                 <th>Wins/rank</th>
                 <th>Ban/Error</th>
                 <th>Action</th>
@@ -87,11 +88,12 @@
                     let preloader = '<div class="preloader-wrapper small active"><div class="spinner-layer spinner-red-only"><div class="circle-clipper left"><div class="circle"></div>\
                         </div><div class="gap-patch"><div class="circle"></div></div><div class="circle-clipper right"><div class="circle"></div></div></div></div>';
                     let name = account.pending ? preloader : account.name ?? '?';
-                    let rank = account.pending ? preloader : account.wins === -1 ? '-' : (account.wins ?? "?") + ((account.wins ?? 0) > 10 ? ('/' + (account.rank ?? "?")) : '');
+                    let rank = account.pending ? preloader : account.wins === -1 ? '-' : (account.wins ?? "?") + ((account.wins ?? 0) >= 10 ? ('/' + (account.rank ?? "?")) : '');
                     let ban = account.pending ? preloader : account.error ? account.error : (account.penalty_reason === 0 ? "-" : ((account.penalty_reason ?? '?') 
                         + ((account.penalty_seconds ?? -1) == -1 ? "" : 
                             (Date.now() > (account.penalty_seconds * 1000) ? " - Expired" 
                             : " - " + countdown(account.penalty_seconds - Math.floor(Date.now() / 1000))))));
+                    let lvl = account.lvl ?? '?';
                     if(!tr) {
                         tr = document.createElement('tr');
                         tr.id = 'acc-' + username;
@@ -100,6 +102,8 @@
                         td_username.innerHTML = username;
                         let td_name = document.createElement('td');
                         td_name.innerHTML = name;
+                        let td_lvl = document.createElement('td');
+                        td_lvl.innerHTML = lvl;
                         let td_rank = document.createElement('td');
                         td_rank.innerHTML = rank;
                         let td_ban = document.createElement('td');
@@ -135,6 +139,7 @@
 
                         tr.appendChild(td_username);
                         tr.appendChild(td_name);
+                        tr.appendChild(td_lvl);
                         tr.appendChild(td_rank);
                         tr.appendChild(td_ban);
                         tr.appendChild(td_action);
@@ -144,11 +149,15 @@
                         if(td_name.innerHTML != name) {
                             td_name.innerHTML = name;
                         }
-                        let td_rank = tr.querySelector("td:nth-child(3)");
+                        let td_lvl = tr.querySelector("td:nth-child(3)");
+                        if(td_lvl.innerHTML != lvl) {
+                            td_lvl.innerHTML = lvl;
+                        }
+                        let td_rank = tr.querySelector("td:nth-child(4)");
                         if(td_rank.innerHTML != rank) {
                             td_rank.innerHTML = rank;
                         }
-                        let td_ban = tr.querySelector("td:nth-child(4)");
+                        let td_ban = tr.querySelector("td:nth-child(5)");
                         if(td_ban.innerHTML != ban) {
                             td_ban.innerHTML = ban;
                         }
