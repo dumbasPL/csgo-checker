@@ -65,6 +65,7 @@ ipcMain.handle("accounts:check", async (event, username) => {
 
     try {
         const res = await check_account(username, account.password);
+        console.log(res);
         db.set(username, {
             password: account.password,
             name: res.name,
@@ -124,26 +125,26 @@ function penalty_reason_string(id) {
 function rank_string(id) {
     switch (id)
     {
-        case 0:	"Unranked"
-		case 1:	"S1"
-		case 2:	"S2"
-		case 3:	"S3"
-		case 4:	"S4"
-		case 5:	"S5"
-		case 6:	"S6"
-		case 7:	"G1"
-		case 8:	"G2"
-		case 9:	"G3"
-		case 10: "G4"
-		case 11: "MG1"
-		case 12: "MG2"
-		case 13: "MGE"
-		case 14: "DMG"
-		case 15: "LE"
-		case 16: "LEM"
-		case 17: "Supreme"
-        case 18: "Global"
-        default: `Unknown(${id})`;
+        case 0:	return "Unranked";
+		case 1:	return "S1";
+		case 2:	return "S2";
+		case 3:	return "S3";
+		case 4:	return "S4";
+		case 5:	return "S5";
+		case 6:	return "S6";
+		case 7:	return "G1";
+		case 8:	return "G2";
+		case 9:	return "G3";
+		case 10: return "G4";
+		case 11: return "MG1";
+		case 12: return "MG2";
+		case 13: return "MGE";
+		case 14: return "DMG";
+		case 15: return "LE";
+		case 16: return "LEM";
+		case 17: return "Supreme";
+        case 18: return "Global";
+        default: return `Unknown(${id})`;
     }
 }
 
@@ -239,18 +240,18 @@ function check_account(username, pass) {
                     let msg = Protos.csgo.CMsgGCCStrike15_v2_MatchmakingGC2ClientHello.decode(payload);
                     msg = Protos.csgo.CMsgGCCStrike15_v2_MatchmakingGC2ClientHello.toObject(msg, { defaults: true });
 
-                    if(is_permanent_penalty_reason(msg.penalty_reason)) {
-                        steamClient.logOff();
-                        currently_checking = currently_checking.filter(x => x !== username);
-                        resolve({
-                            penalty_reason: penalty_reason_string(msg.penalty_reason),
-                            penalty_seconds: -1,
-                            wins: -1,
-                            rank: -1,
-                            name: steamClient.accountInfo.name
-                        });
-                        return;
-                    }
+                    // if(is_permanent_penalty_reason(msg.penalty_reason)) {
+                    //     steamClient.logOff();
+                    //     currently_checking = currently_checking.filter(x => x !== username);
+                    //     resolve({
+                    //         penalty_reason: penalty_reason_string(msg.penalty_reason),
+                    //         penalty_seconds: -1,
+                    //         wins: -1,
+                    //         rank: -1,
+                    //         name: steamClient.accountInfo.name
+                    //     });
+                    //     return;
+                    // }
 
                     if(!AcknowledgedPenalty && msg.penalty_seconds > 0) {
                         let message = Protos.csgo.CMsgGCCStrike15_v2_AcknowledgePenalty.create({
@@ -281,6 +282,7 @@ function check_account(username, pass) {
                         if(!Done) {
                             Done = true;
                             currently_checking = currently_checking.filter(x => x !== username);
+                            console.log(msg);
                             resolve({ 
                                 penalty_reason: msg.vac_banned ? 'VAC' : penalty_reason_string(msg.penalty_reason),
                                 penalty_seconds: msg.vac_banned ? -1 : msg.penalty_seconds > 0 ? (Math.floor(Date.now() / 1000) + msg.penalty_seconds) : 0,

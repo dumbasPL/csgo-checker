@@ -9,7 +9,7 @@
 <body style="background: #333; color: #ddd">
     <nav>
         <div class="nav-wrapper red">
-            <a class="brand-logo center">Steam account checker</a>
+            <a class="brand-logo center">Steam account checker 1.1</a>
             <ul class="right">
                 <li>
                     <a class="btn-flat waves-effect waves-light modal-trigger white-text" href="#modal1" style="margin: 0;"><i class="large material-icons">add</i></a>
@@ -87,7 +87,7 @@
                     let preloader = '<div class="preloader-wrapper small active"><div class="spinner-layer spinner-red-only"><div class="circle-clipper left"><div class="circle"></div>\
                         </div><div class="gap-patch"><div class="circle"></div></div><div class="circle-clipper right"><div class="circle"></div></div></div></div>';
                     let name = account.pending ? preloader : account.name ?? '?';
-                    let rank = account.pending ? preloader : account.wins === -1 ? '-' : (account.wins ?? 0) > 10 ? (account.rank == 0 ? "?" : account.rank) : (account.wins ?? "?");
+                    let rank = account.pending ? preloader : account.wins === -1 ? '-' : (account.wins ?? "?") + ((account.wins ?? 0) > 10 ? ('/' + (account.rank ?? "?")) : '');
                     let ban = account.pending ? preloader : account.error ? account.error : (account.penalty_reason === 0 ? "-" : ((account.penalty_reason ?? '?') 
                         + ((account.penalty_seconds ?? -1) == -1 ? "" : 
                             (Date.now() > (account.penalty_seconds * 1000) ? " - Expired" 
@@ -179,6 +179,7 @@
                             M.toast({html: username + ': ' + ret.error, classes: 'red'});
                         }
                     });
+                    await new Promise(p => setTimeout(p, 200));
                 }
             }
             updateAccounts();
