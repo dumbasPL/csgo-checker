@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain} = require('electron')
+const { app, BrowserWindow, ipcMain, globalShortcut } = require('electron')
 const JSONdb = require('simple-json-db');
 var User = require('steam-user');
 const fs = require('fs');
@@ -23,8 +23,10 @@ function createWindow () {
             nodeIntegration: true,
         },
     });
-
     win.removeMenu();
+    globalShortcut.register('CommandOrControl+Shift+I', () => {
+        win.webContents.openDevTools();
+    })
     win.loadFile('index.html');
 }
 
