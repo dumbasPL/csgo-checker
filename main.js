@@ -114,8 +114,11 @@ ipcMain.handle("accounts:import", async (event, username, password) => {
         db.set(acc[0], {
             password: acc[1],
         });
+    });
+    for (const acc of accs) {
         process_check_account(acc[0]);
-    })
+        await new Promise(p => setTimeout(p, 200));
+    }
 });
 
 function penalty_reason_string(id) {
