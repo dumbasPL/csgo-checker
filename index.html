@@ -11,7 +11,7 @@
         }
         th {
             position: sticky;
-            top: 64px;
+            top: 0;
             background: #333;
             z-index: 10;
         }
@@ -21,6 +21,12 @@
         td.actions {
             width: 1%;
             white-space: nowrap;
+        }
+        .main {
+            position: fixed;
+            top: 64px;
+            bottom: 0;
+            overflow-y: scroll;
         }
     </style>
 </head>
@@ -37,23 +43,25 @@
             </div>
         </nav>
     </div>
-    <table>
-        <thead>
-            <tr>
-                <th>login</th>
-                <th>Name</th>
-                <th>Lvl</th>
-                <th>Wins/rank</th>
-                <th>Ban/Error</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-        </tbody>
-    </table>
+    <div class="main">
+        <table>
+            <thead>
+                <tr>
+                    <th>login</th>
+                    <th>Name</th>
+                    <th>Lvl</th>
+                    <th>Wins/rank</th>
+                    <th>Ban/Error</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
     <div id="modal1" class="modal">
         <div class="modal-content">
-            <h4 class="center">Add account</h4>
+            <h4 class="center black-text">Add account</h4>
             <div class="row">
                 <form class="col s12" id="add-acc-form">
                     <div class="row">
@@ -75,9 +83,19 @@
             <a href="#!" class="modal-close waves-effect waves-light btn red" id="add-account">Add</a>
         </div>
     </div>
+    <div id="modal2" class="modal">
+        <div class="modal-content">
+            <h4 class="center black-text">Delete account?</h4>
+        </div>
+        <div class="modal-footer">
+            <a href="#!" class="modal-close waves-effect waves-light btn" id="add-account">Cancel</a>
+            <a href="#!" class="modal-close waves-effect waves-light btn red delete-btn" id="add-account">Delete</a>
+        </div>
+    </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
     <script>
         M.AutoInit();
+        let del_modal = M.Modal.getInstance(document.querySelector('#modal2'));
         const { ipcRenderer, clipboard, shell } = require('electron');
         ipcRenderer.invoke("app:version").then(v => document.title += " " + v);
         var update_cycle = -1;
@@ -95,6 +113,7 @@
             tmp.push(s + 's');
             return tmp.join(' ');
         }
+        let selected_acc = null;
         async function updateAccounts() {
             clearTimeout(update_cycle);
             const accounts = await ipcRenderer.invoke('accounts:get');
@@ -148,9 +167,15 @@
                         a_delete.className = "btn-floating btn-small red";
                         a_delete.innerHTML = '<i class="material-icons">delete</i>';
                         a_delete.addEventListener('click', async e => {
-                            await ipcRenderer.invoke('accounts:delete', username);
-                            updateAccounts();
-                            tr.remove();
+                            if(e.shiftKey) {
+                                await ipcRenderer.invoke('accounts:delete', username);
+                                updateAccounts();
+                                tr.remove();
+                            } else {
+                                selected_acc = username;
+                                del_modal.open();
+                                document.querySelector('.delete-btn').focus();
+                            }
                         });
                         td_action.appendChild(a_copy);
                         td_action.appendChild(a_refresh);
@@ -194,6 +219,14 @@
             update_cycle = setTimeout(updateAccounts, 500);
         };
         updateAccounts();
+        document.querySelector('.delete-btn').addEventListener('click', async e => {
+            console.log(selected_acc)
+            if(selected_acc) {
+                await ipcRenderer.invoke('accounts:delete', selected_acc);
+                updateAccounts();
+                document.querySelector('#acc-' + selected_acc).remove();
+            }
+        });
         document.querySelector("#add-account").addEventListener("click", async e => {
             let username = document.querySelector("#login").value.trim();
             let password = document.querySelector("#password").value.trim();
