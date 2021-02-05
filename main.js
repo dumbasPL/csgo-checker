@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, globalShortcut } = require('electron')
+const { app, BrowserWindow, ipcMain, globalShortcut, dialog } = require('electron')
 const JSONdb = require('simple-json-db');
 var User = require('steam-user');
 const fs = require('fs');
@@ -59,7 +59,7 @@ ipcMain.handle("accounts:get", () => {
     return data;
 });
 
-ipcMain.handle("accounts:check", async (event, username) => {
+async function process_check_account(username) {
     const account = db.get(username);
     if(!account) {
         return {
@@ -91,7 +91,9 @@ ipcMain.handle("accounts:check", async (event, username) => {
             error: error
         };
     }
-});
+}
+
+ipcMain.handle("accounts:check", async (event, username) => await process_check_account(username));
 
 ipcMain.handle("accounts:add", (event, username, password) => {
     db.set(username, {
@@ -101,6 +103,19 @@ ipcMain.handle("accounts:add", (event, username, password) => {
 
 ipcMain.handle("accounts:delete", (event, username, password) => {
     db.delete(username);
+});
+
+ipcMain.handle("accounts:import", async (event, username, password) => {
+    let file = await dialog.showOpenDialog(event.sender, { properties: ['openFile'], });
+    if(file.canceled) return;
+    file = file.filePaths[0];
+    let accs = fs.readFileSync(file).toString().split('\n').map(x => x.trim().split(":")).filter(x => x && x.length == 2);
+    accs.forEach(acc => {
+        db.set(acc[0], {
+            password: acc[1],
+        });
+        process_check_account(acc[0]);
+    })
 });
 
 function penalty_reason_string(id) {
@@ -124,7 +139,7 @@ function penalty_reason_string(id) {
     case 18: 
     case 19: 
     case 20: return "Rank Calibration";
-    default: return "Unknown";
+    default: return `Unknown(${id})`;
     }
 }
 

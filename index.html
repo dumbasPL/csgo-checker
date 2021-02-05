@@ -30,12 +30,9 @@
             <div class="nav-wrapper red">
                 <a class="brand-logo center">Steam account checker</a>
                 <ul class="right">
-                    <li>
-                        <a class="btn-flat waves-effect waves-light modal-trigger white-text" href="#modal1" style="margin: 0;"><i class="large material-icons">add</i></a>
-                    </li>
-                    <li>
-                        <a class="btn-flat waves-effect waves-light white-text" id="reloadall" style="margin: 0;"><i class="large material-icons">refresh</i></a>
-                    </li>
+                    <li><a class="btn-flat waves-effect waves-light white-text" id="importtxt" style="margin: 0;"><i class="large material-icons">save_alt</i></a></li>
+                    <li><a class="btn-flat waves-effect waves-light white-text modal-trigger" href="#modal1" style="margin: 0;"><i class="large material-icons">add</i></a></li>
+                    <li><a class="btn-flat waves-effect waves-light white-text" id="reloadall" style="margin: 0;"><i class="large material-icons">refresh</i></a></li>
                 </ul>
             </div>
         </nav>
@@ -81,7 +78,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
     <script>
         M.AutoInit();
-        const { ipcRenderer, clipboard, shell, app } = require('electron');
+        const { ipcRenderer, clipboard, shell } = require('electron');
         ipcRenderer.invoke("app:version").then(v => document.title += " " + v);
         var update_cycle = -1;
         function countdown(s) {
@@ -222,6 +219,9 @@
                 }
             }
             updateAccounts();
+        });
+        document.querySelector('#importtxt').addEventListener('click', async e => {
+            await ipcRenderer.invoke('accounts:import');
         });
     </script>
 </body>
