@@ -5,21 +5,41 @@
     <title>Steam account checker</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        table {
+            position: relative;
+        }
+        th {
+            position: sticky;
+            top: 64px;
+            background: #333;
+            z-index: 10;
+        }
+        td, th {
+            padding: 8px 5px;
+        }
+        td.actions {
+            width: 1%;
+            white-space: nowrap;
+        }
+    </style>
 </head>
 <body style="background: #333; color: #ddd">
-    <nav>
-        <div class="nav-wrapper red">
-            <a class="brand-logo center">Steam account checker 0.1.2</a>
-            <ul class="right">
-                <li>
-                    <a class="btn-flat waves-effect waves-light modal-trigger white-text" href="#modal1" style="margin: 0;"><i class="large material-icons">add</i></a>
-                </li>
-                <li>
-                    <a class="btn-flat waves-effect waves-light white-text" id="reloadall" style="margin: 0;"><i class="large material-icons">refresh</i></a>
-                </li>
-              </ul>
-        </div>
-    </nav>
+    <div class="navbar-fixed">
+        <nav>
+            <div class="nav-wrapper red">
+                <a class="brand-logo center">Steam account checker</a>
+                <ul class="right">
+                    <li>
+                        <a class="btn-flat waves-effect waves-light modal-trigger white-text" href="#modal1" style="margin: 0;"><i class="large material-icons">add</i></a>
+                    </li>
+                    <li>
+                        <a class="btn-flat waves-effect waves-light white-text" id="reloadall" style="margin: 0;"><i class="large material-icons">refresh</i></a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    </div>
     <table>
         <thead>
             <tr>
@@ -61,7 +81,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
     <script>
         M.AutoInit();
-        const { ipcRenderer, clipboard } = require('electron');
+        const { ipcRenderer, clipboard, shell, app } = require('electron');
+        ipcRenderer.invoke("app:version").then(v => document.title += " " + v);
         var update_cycle = -1;
         function countdown(s) {
             const d = Math.floor(s / (3600 * 24));
@@ -93,7 +114,7 @@
                         + ((account.penalty_seconds ?? -1) == -1 ? "" : 
                             (Date.now() > (account.penalty_seconds * 1000) ? " - Expired" 
                             : " - " + countdown(account.penalty_seconds - Math.floor(Date.now() / 1000))))));
-                    let lvl = account.lvl ?? '?';
+                    let lvl = account.pending ? preloader : account.lvl ?? '?';
                     if(!tr) {
                         tr = document.createElement('tr');
                         tr.id = 'acc-' + username;
@@ -109,13 +130,14 @@
                         let td_ban = document.createElement('td');
                         td_ban.innerHTML = ban;
                         let td_action = document.createElement('td');
+                        td_action.className = "actions";
                         let a_copy = document.createElement('a');
                         a_copy.className = "btn-floating btn-small red";
                         a_copy.innerHTML = '<i class="material-icons">content_copy</i>';
                         a_copy.addEventListener('click', async e => {
                             clipboard.writeText(account.password, 'selection');
                             M.toast({html: 'Copied!', classes: 'green'});
-                        })
+                        });
                         let a_refresh = document.createElement('a');
                         a_refresh.className = "btn-floating btn-small red";
                         a_refresh.innerHTML = '<i class="material-icons">refresh</i>';
@@ -132,11 +154,10 @@
                             await ipcRenderer.invoke('accounts:delete', username);
                             updateAccounts();
                             tr.remove();
-                        })
+                        });
                         td_action.appendChild(a_copy);
                         td_action.appendChild(a_refresh);
                         td_action.appendChild(a_delete);
-
                         tr.appendChild(td_username);
                         tr.appendChild(td_name);
                         tr.appendChild(td_lvl);
@@ -161,6 +182,15 @@
                         if(td_ban.innerHTML != ban) {
                             td_ban.innerHTML = ban;
                         }
+                    }
+                    if(account.steamid && !tr.querySelector(".open-profile")) {
+                        let a_open_profile = document.createElement('a');
+                        a_open_profile.className = "btn-floating btn-small red open-profile";
+                        a_open_profile.innerHTML = '<i class="material-icons">launch</i>';
+                        a_open_profile.addEventListener('click', async e => {
+                            shell.openExternal('https://steamcommunity.com/profiles/' + account.steamid);
+                        });
+                        tr.querySelector(".actions").appendChild(a_open_profile);
                     }
                 }
             }

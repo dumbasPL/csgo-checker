@@ -44,6 +44,8 @@ app.on('activate', () => {
     }
 })
 
+ipcMain.handle("app:version", app.getVersion);
+
 ipcMain.handle("accounts:get", () => {
     let data = db.JSON();
     for (const username in data) {
@@ -75,7 +77,8 @@ ipcMain.handle("accounts:check", async (event, username) => {
             penalty_seconds: res.penalty_seconds,
             rank: res.rank,
             wins: res.wins,
-            lvl: res.lvl
+            lvl: res.lvl,
+            steamid: res.steamid
         });
         return res;
     } catch (error) {
@@ -218,7 +221,8 @@ function check_account(username, pass) {
             reject(`steam guard is enabled`);
         });
 
-        steamClient.on('vacBans', (numBans, appids) => {
+        // steamClient.on('vacBans', (numBans, appids) => {
+        steamClient.on('accountLimitations', (numBans, appids) => {
             console.log(`logged into account ${username}`);
             steamClient.gamesPlayed(730);
         });
@@ -272,14 +276,15 @@ function check_account(username, pass) {
                         if(!Done) {
                             Done = true;
                             currently_checking = currently_checking.filter(x => x !== username);
-                            console.log(msg);
+                            // console.log(`steam id: ${}`);
                             resolve({ 
                                 penalty_reason: steamClient.limitations.communityBanned ? 'Community' : msg.vac_banned ? 'VAC' : penalty_reason_string(msg.penalty_reason),
                                 penalty_seconds: msg.vac_banned || steamClient.limitations.communityBanned ? -1 : msg.penalty_seconds > 0 ? (Math.floor(Date.now() / 1000) + msg.penalty_seconds) : 0,
                                 wins: msg.vac_banned ? -1 : attempts < 5 ? msg.ranking.wins : 0,
                                 rank: msg.vac_banned ? -1 : attempts < 5 ? rank_string(msg.ranking.rank_id) : 0,
                                 name: steamClient.accountInfo.name,
-                                lvl: msg.player_level
+                                lvl: msg.player_level,
+                                steamid: steamClient.steamID.getSteamID64()
                             });
                         }
                         steamClient.logOff();
