@@ -133,7 +133,7 @@
                         td_action.className = "actions";
                         let a_copy = document.createElement('a');
                         a_copy.className = "btn-floating btn-small red";
-                        a_copy.innerHTML = '<i class="material-icons">content_copy</i>';
+                        a_copy.innerHTML = '<i class="material-icons">password</i>';
                         a_copy.addEventListener('click', async e => {
                             clipboard.writeText(account.password, 'selection');
                             M.toast({html: 'Copied!', classes: 'green'});
