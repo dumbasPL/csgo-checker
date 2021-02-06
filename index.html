@@ -16,7 +16,7 @@
             z-index: 10;
         }
         td, th {
-            padding: 8px 5px;
+            padding: 5px 5px;
         }
         td.actions {
             width: 1%;
@@ -139,7 +139,9 @@
                     let preloader = '<div class="preloader-wrapper small active"><div class="spinner-layer spinner-red-only"><div class="circle-clipper left"><div class="circle"></div>\
                         </div><div class="gap-patch"><div class="circle"></div></div><div class="circle-clipper right"><div class="circle"></div></div></div></div>';
                     let name = account.pending ? preloader : account.name ?? '?';
-                    let rank = account.pending ? preloader : account.wins === -1 ? '-' : (account.wins ?? "?") + ((account.wins ?? 0) >= 10 ? ('/' + (account.rank ?? "?")) : '');
+                    let rank = account.pending ? '' : account.wins === -1 ? '-' : (account.wins ?? "?") + ((account.wins ?? 0) >= 10 ? ('/' + (account.rank ?? "?")) : '');
+                    let rank_wg = account.pending ? '' : account.wins_wg === -1 ? '-' : (account.wins_wg ?? "?") + ((account.wins_wg ?? 0) >= 10 ? ('/' + (account.rank_wg ?? "?")) : '');
+                    rank = account.pending ? preloader : ('MM: ' + rank + '<br>WG: ' + rank_wg);
                     let ban = account.pending ? preloader : account.error ? account.error : (account.penalty_reason === 0 ? "-" : ((account.penalty_reason ?? '?') 
                         + ((account.penalty_seconds ?? -1) == -1 ? "" : 
                             (Date.now() > (account.penalty_seconds * 1000) ? " - Expired" 

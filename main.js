@@ -77,6 +77,8 @@ async function process_check_account(username) {
             penalty_seconds: res.penalty_seconds,
             rank: res.rank,
             wins: res.wins,
+            wins_wg: res.wins_wg,
+            rank_wg: res.rank_wg,
             lvl: res.lvl,
             steamid: res.steamid
         });
@@ -146,10 +148,14 @@ function penalty_reason_string(id) {
     }
 }
 
-function rank_string(id) {
+function rank_string(id, wins) {
     switch (id)
     {
-        case 0:	return "Unranked";
+        case 0:	
+            if(wins >= 10) {
+                return "Expired";
+            }
+            return "Unranked";
 		case 1:	return "S1";
 		case 2:	return "S2";
 		case 3:	return "S3";
@@ -252,6 +258,8 @@ function check_account(username, pass) {
             });
         });
 
+        let data = {};
+
         steamClient.on('receivedFromGC', (appid, msgType, payload) => {
             console.log(`receivedFromGC ${msgType} on account ${username}`);
             switch(msgType) {
@@ -262,6 +270,12 @@ function check_account(username, pass) {
                     break;
                 }
                 case 9110: {
+                    {
+                        let message = Protos.csgo.CMsgGCCStrike15_v2_ClientGCRankUpdate.create({ rankings: [ { rank_type_id: 7 } ] });//request wingman rank
+                        let encoded = Protos.csgo.CMsgGCCStrike15_v2_ClientGCRankUpdate.encode(message);
+                        steamClient.sendToGC(appid, 9194, {}, encoded.finish());
+                    }
+
                     let msg = Protos.csgo.CMsgGCCStrike15_v2_MatchmakingGC2ClientHello.decode(payload);
                     msg = Protos.csgo.CMsgGCCStrike15_v2_MatchmakingGC2ClientHello.toObject(msg, { defaults: true });
 
@@ -295,19 +309,40 @@ function check_account(username, pass) {
                             Done = true;
                             currently_checking = currently_checking.filter(x => x !== username);
                             // console.log(`steam id: ${}`);
-                            resolve({ 
-                                penalty_reason: steamClient.limitations.communityBanned ? 'Community' : msg.vac_banned ? 'VAC' : penalty_reason_string(msg.penalty_reason),
-                                penalty_seconds: msg.vac_banned || steamClient.limitations.communityBanned ? -1 : msg.penalty_seconds > 0 ? (Math.floor(Date.now() / 1000) + msg.penalty_seconds) : 0,
-                                wins: msg.vac_banned ? -1 : attempts < 5 ? msg.ranking.wins : 0,
-                                rank: msg.vac_banned ? -1 : attempts < 5 ? rank_string(msg.ranking.rank_id) : 0,
-                                name: steamClient.accountInfo.name,
-                                lvl: msg.player_level,
-                                steamid: steamClient.steamID.getSteamID64()
-                            });
+                            data.penalty_reason = steamClient.limitations.communityBanned ? 'Community' : msg.vac_banned ? 'VAC' : penalty_reason_string(msg.penalty_reason),
+                            data.penalty_seconds = msg.vac_banned || steamClient.limitations.communityBanned ? -1 : msg.penalty_seconds > 0 ? (Math.floor(Date.now() / 1000) + msg.penalty_seconds) : 0,
+                            data.wins = msg.vac_banned ? -1 : attempts < 5 ? msg.ranking.wins : 0,
+                            data.rank = msg.vac_banned ? -1 : attempts < 5 ? rank_string(msg.ranking.rank_id, msg.ranking.wins) : 0,
+                            data.name = steamClient.accountInfo.name,
+                            data.lvl = msg.player_level,
+                            data.steamid = steamClient.steamID.getSteamID64()
+                            if(data.rank_wg != undefined) {
+                                resolve(data);
+                                steamClient.logOff();
+                            }
                         }
-                        steamClient.logOff();
                     }
                     break;
+                }
+                case 9194: {
+                    let msg = Protos.csgo.CMsgGCCStrike15_v2_ClientGCRankUpdate.decode(payload);
+                    msg = Protos.csgo.CMsgGCCStrike15_v2_ClientGCRankUpdate.toObject(msg, { defaults: true });
+                    for (const ranking of msg.rankings) {
+                        if(ranking.rank_type_id == 7) { //wingman
+                            console.log(msg);
+                            data.wins_wg = ranking.wins;
+                            data.rank_wg = rank_string(ranking.rank_id, ranking.wins);
+                            if(data.wins === -1) { //vac banned
+                                data.wins_wg == -1;
+                                data.rank_wg == -1;
+                            }
+                            if(data.steamid != undefined) {
+                                resolve(data);
+                                steamClient.logOff();
+                                break;
+                            }
+                        }
+                    }
                 }
                 default:
                     break;
