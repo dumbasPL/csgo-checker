@@ -181,7 +181,7 @@
                         a_delete.className = "btn-floating btn-small red";
                         a_delete.innerHTML = '<i class="material-icons">delete</i>';
                         a_delete.addEventListener('click', async e => {
-                            if(e.shiftKey) {
+                            if(e.ctrlKey) {
                                 await ipcRenderer.invoke('accounts:delete', username);
                                 updateAccounts();
                                 tr.remove();
