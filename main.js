@@ -2,6 +2,7 @@ const { app, BrowserWindow, ipcMain, globalShortcut, dialog } = require('electro
 const JSONdb = require('simple-json-db');
 var User = require('steam-user');
 const fs = require('fs');
+const util = require('util');
 const Protos = require('./helpers/protos.js')([{
     name: "csgo",
     protos: [
@@ -308,8 +309,8 @@ function check_account(username, pass) {
                         if(!Done) {
                             Done = true;
                             currently_checking = currently_checking.filter(x => x !== username);
-                            // console.log(`steam id: ${}`);
-                            data.penalty_reason = steamClient.limitations.communityBanned ? 'Community' : msg.vac_banned ? 'VAC' : penalty_reason_string(msg.penalty_reason),
+                            // console.log(util.inspect(msg, false, null));
+                            data.penalty_reason = steamClient.limitations.communityBanned ? 'Community' : msg.penalty_reason > 0 ? penalty_reason_string(msg.penalty_reason) : msg.vac_banned ? 'VAC' : 0,
                             data.penalty_seconds = msg.vac_banned || steamClient.limitations.communityBanned ? -1 : msg.penalty_seconds > 0 ? (Math.floor(Date.now() / 1000) + msg.penalty_seconds) : 0,
                             data.wins = msg.vac_banned ? -1 : attempts < 5 ? msg.ranking.wins : 0,
                             data.rank = msg.vac_banned ? -1 : attempts < 5 ? rank_string(msg.ranking.rank_id, msg.ranking.wins) : 0,
