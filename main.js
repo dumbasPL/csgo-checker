@@ -13,22 +13,30 @@ if(!fs.existsSync(app.getPath('userData'))){
     fs.mkdirSync(app.getPath('userData')) //makes data on first run
 }
 
+let win = null
+
 const db = new JSONdb(app.getPath('userData') + '/accounts.json');
 db.sync(); //makes empty file on first run
 
 var currently_checking = [];
 
 function createWindow () {
-    const win = new BrowserWindow({
+    win = new BrowserWindow({
         webPreferences: {
             nodeIntegration: true,
         },
     });
     win.removeMenu();
-    globalShortcut.register('CommandOrControl+Shift+I', () => {
-        win.webContents.openDevTools();
-    })
+    // globalShortcut.register('CommandOrControl+Shift+I', () => {
+    //     win.webContents.openDevTools();
+    // })
     win.loadFile('index.html');
+    win.webContents.on('before-input-event', (event, input) => {
+        if (input.control && input.shift && input.key.toLowerCase() === 'i') {
+            win.webContents.openDevTools();
+            event.preventDefault();
+        }
+    })
 }
 
 app.whenReady().then(createWindow)
@@ -207,8 +215,9 @@ function check_account(username, pass) {
         let steamClient = new User();
 
         steamClient.logOn({
-            "accountName": username,
-            "password": pass,
+            accountName: username,
+            password: pass,
+            rememberPassword: true,
         });
 
         steamClient.on('disconnected', (eresult, msg) => {
@@ -232,6 +241,10 @@ function check_account(username, pass) {
                     errorStr =  `Rate Limit Exceeded`;
                     break;
                 }
+                case 65: {
+                    errorStr =  `steam guard is invalid`;
+                    break;
+                }
                 default: {
                     errorStr = `Unknown: ${e.eresult}`;
                     break;
@@ -242,8 +255,20 @@ function check_account(username, pass) {
         });
 
         steamClient.on('steamGuard', (domain, callback) => {
-            currently_checking = currently_checking.filter(x => x !== username);
-            reject(`steam guard is enabled`);
+            if (!win) {
+                currently_checking = currently_checking.filter(x => x !== username);
+                reject(`steam guard is enabled`);
+            } else {
+                win.webContents.send('steam:steamguard', username);
+                ipcMain.once('steam:steamguard:response', async (event, code) => {
+                    if (!code) {
+                        currently_checking = currently_checking.filter(x => x !== username);
+                        reject(`steam guard is enabled`);
+                    } else {
+                        callback(code);
+                    }
+                });
+            }
         });
 
         // steamClient.on('vacBans', (numBans, appids) => {

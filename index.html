@@ -106,6 +106,26 @@
             <a href="#!" class="modal-close waves-effect waves-light btn red delete-btn" id="add-account">Delete</a>
         </div>
     </div>
+    <div id="modal3" class="modal">
+        <div class="modal-content">
+            <h4 class="center black-text">Steam guard for account <span id="guard-acc-name">ERROR</span></h4>
+            <div class="row">
+                <form class="col s12" id="guard-acc-form">
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <input id="guard-code" type="text" class="validate">
+                            <label for="guard-code">Code</label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <a href="#!" class="modal-close waves-effect waves-light btn red" id="guard-submit">Submit</a>
+            <a href="#!" class="modal-close waves-effect waves-light btn red" id="guard-cancel">Cancel</a>
+            
+        </div>
+    </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
     <script>
         M.AutoInit();
@@ -176,7 +196,10 @@
                         a_refresh.addEventListener('click', async e => {
                             let promise = ipcRenderer.invoke('accounts:check', username);
                             updateAccounts();
-                            await promise;
+                            let ret = await promise;
+                            if(ret.error) {
+                                M.toast({html: username + ': ' + ret.error, classes: 'red'});
+                            }
                             updateAccounts();
                         });
                         let a_delete = document.createElement('a');
@@ -272,6 +295,27 @@
         document.querySelector('#importtxt').addEventListener('click', async e => {
             await ipcRenderer.invoke('accounts:import');
         });
+        document.querySelector('#guard-submit').addEventListener('click', async e => {
+            let code = document.querySelector("#guard-code").value.trim();
+            if (code.length > 0) {
+                await ipcRenderer.send('steam:steamguard:response', code);
+            } else {
+                M.toast({html: 'Steam guard code can not be empty'});
+            }
+        })
+        document.querySelector('#guard-cancel').addEventListener('click', async e => {
+            await ipcRenderer.send('steam:steamguard:response', null);
+        })
+        M.Modal.init(document.querySelectorAll('#modal3'), {
+            dismissible: false
+        });
+        let modal3 = M.Modal.getInstance(document.querySelector('#modal3'));
+        ipcRenderer.on('steam:steamguard', (event, username) => {
+            document.querySelector('#guard-acc-name').innerText = username;
+            document.querySelector("#guard-code").value = '';
+            modal3.open();
+        })
+        
     </script>
 </body>
 </html>
