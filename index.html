@@ -64,6 +64,7 @@
                     <th>login</th>
                     <th>Name</th>
                     <th>Lvl</th>
+                    <th>Prime</th>
                     <th>Wins/rank</th>
                     <th>Ban/Error</th>
                     <th>Action</th>
@@ -128,6 +129,9 @@
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
     <script>
+        let red_filter = 'brightness(0) saturate(100%) invert(16%) sepia(42%) saturate(6385%) hue-rotate(355deg) brightness(100%) contrast(100%)';
+        let green_filter = 'brightness(0) saturate(100%) invert(32%) sepia(100%) saturate(1307%) hue-rotate(93deg) brightness(98%) contrast(105%)';
+
         M.AutoInit();
         let del_modal = M.Modal.getInstance(document.querySelector('#modal2'));
         const { ipcRenderer, clipboard, shell } = require('electron');
@@ -160,6 +164,7 @@
                         </div><div class="gap-patch"><div class="circle"></div></div><div class="circle-clipper right"><div class="circle"></div></div></div></div>';
                     let name = account.pending ? preloader : account.name ?? '?';
                     let rank = account.pending ? '' : account.wins === -1 ? '-' : (account.wins ?? "?") + ((account.wins ?? 0) >= 10 ? ('/' + (account.rank ?? "?")) : '');
+                    let prime = account.pending ? undefined : account.prime;
                     let rank_wg = account.pending ? '' : account.wins_wg === -1 ? '-' : (account.wins_wg ?? "?") + ((account.wins_wg ?? 0) >= 10 ? ('/' + (account.rank_wg ?? "?")) : '');
                     rank = account.pending ? preloader : ('MM: ' + rank + '<br>WG: ' + rank_wg);
                     let ban = account.pending ? preloader : account.error ? account.error : (account.penalty_reason === 0 ? "-" : ((account.penalty_reason ?? '?') 
@@ -177,6 +182,12 @@
                         td_name.innerHTML = name;
                         let td_lvl = document.createElement('td');
                         td_lvl.innerHTML = lvl;
+                        let td_prime = document.createElement('td');
+                        let prime_badge = document.createElement('img');
+                        prime_badge.src = 'prime.svg';
+                        prime_badge.style.filter = prime ? green_filter : red_filter;
+                        prime_badge.style.display = prime === undefined || prime === null ? 'none' : 'block';
+                        td_prime.appendChild(prime_badge);
                         let td_rank = document.createElement('td');
                         td_rank.innerHTML = rank;
                         let td_ban = document.createElement('td');
@@ -222,6 +233,7 @@
                         tr.appendChild(td_username);
                         tr.appendChild(td_name);
                         tr.appendChild(td_lvl);
+                        tr.appendChild(td_prime);
                         tr.appendChild(td_rank);
                         tr.appendChild(td_ban);
                         tr.appendChild(td_action);
@@ -235,11 +247,14 @@
                         if(td_lvl.innerHTML != lvl) {
                             td_lvl.innerHTML = lvl;
                         }
-                        let td_rank = tr.querySelector("td:nth-child(4)");
+                        let prime_badge = tr.querySelector("td:nth-child(4) img");
+                        prime_badge.style.filter = prime ? green_filter : red_filter;
+                        prime_badge.style.display = prime === undefined || prime === null ? 'none' : 'block';
+                        let td_rank = tr.querySelector("td:nth-child(5)");
                         if(td_rank.innerHTML != rank) {
                             td_rank.innerHTML = rank;
                         }
-                        let td_ban = tr.querySelector("td:nth-child(5)");
+                        let td_ban = tr.querySelector("td:nth-child(6)");
                         if(td_ban.innerHTML != ban) {
                             td_ban.innerHTML = ban;
                         }

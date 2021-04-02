@@ -7,6 +7,8 @@ const Protos = require('./helpers/protos.js')([{
     name: "csgo",
     protos: [
         __dirname + "/protos/cstrike15_gcmessages.proto",
+        __dirname + "/protos/gcsdk_gcmessages.proto",
+        __dirname + "/protos/base_gcmessages.proto",
     ]
 }]);
 if(!fs.existsSync(app.getPath('userData'))){
@@ -25,11 +27,10 @@ function createWindow () {
         webPreferences: {
             nodeIntegration: true,
         },
+        width: 1100,
+        height: 650,
     });
     win.removeMenu();
-    // globalShortcut.register('CommandOrControl+Shift+I', () => {
-    //     win.webContents.openDevTools();
-    // })
     win.loadFile('index.html');
     win.webContents.on('before-input-event', (event, input) => {
         if (input.control && input.shift && input.key.toLowerCase() === 'i') {
@@ -89,7 +90,8 @@ async function process_check_account(username) {
             wins_wg: res.wins_wg,
             rank_wg: res.rank_wg,
             lvl: res.lvl,
-            steamid: res.steamid
+            steamid: res.steamid,
+            prime: res.prime,
         });
         return res;
     } catch (error) {
@@ -285,11 +287,45 @@ function check_account(username, pass) {
         });
 
         let data = {};
+        data.prime = false;
 
         steamClient.on('receivedFromGC', (appid, msgType, payload) => {
             console.log(`receivedFromGC ${msgType} on account ${username}`);
             switch(msgType) {
                 case 4004: {
+                    let msg = Protos.csgo.CMsgClientWelcome.decode(payload);
+                    msg = Protos.csgo.CMsgClientWelcome.toObject(msg, { defaults: true });
+                    for (let i = 0; i < msg.outofdate_subscribed_caches.length; i++) {
+                        let msg2 = msg.outofdate_subscribed_caches[i];
+                        for (let j = 0; j < msg2.objects.length; j++) {
+                            let msg3 = msg2.objects[j];
+                            if (msg3.object_data.length == 0) {
+                                continue;
+                            }
+                            switch (msg3.type_id) {
+                            case 2: {
+                                let msg4 = Protos.csgo.CSOPersonaDataPublic.decode(msg3.object_data[0]);
+                                msg4 = Protos.csgo.CSOPersonaDataPublic.toObject(msg4, { defaults: true });
+                                if (msg4.player_level >= 21) {
+                                    data.prime = true;
+                                }
+                                break;
+                            }
+                            case 7: {
+                                let msg4 = Protos.csgo.CSOEconGameAccountClient.decode(msg3.object_data[0]);
+                                msg4 = Protos.csgo.CSOEconGameAccountClient.toObject(msg4, { defaults: true });
+                                if ((msg4.bonus_xp_usedflags & 16) != 0) { //EXPBonusFlag.PrestigeEarned
+                                    data.prime = true;
+                                }
+                                if (msg4.elevated_state == 5) {
+                                    data.prime = true;
+                                }
+                                break;
+                            }
+                            }
+                        }
+                    }
+
                     sleep(1000).then(() => {
                         steamClient.sendToGC(appid, 9109, {}, Buffer.alloc(0));
                     });
