@@ -1,5 +1,5 @@
-if (require('electron-squirrel-startup')) return;
 const { app, BrowserWindow, ipcMain, globalShortcut, dialog } = require('electron');
+const { autoUpdater } = require("electron-updater");
 const isDev = require('electron-is-dev');
 const JSONdb = require('simple-json-db');
 var User = require('steam-user');
@@ -16,12 +16,6 @@ const Protos = require('./helpers/protos.js')([{
 }]);
 if(!fs.existsSync(app.getPath('userData'))){
     fs.mkdirSync(app.getPath('userData')) //makes data on first run
-}
-
-if (!isDev) {
-    require('update-electron-app')({
-        repo: 'dumbasPL/csgo-checker',
-    });
 }
 
 let win = null
@@ -62,6 +56,21 @@ app.on('activate', () => {
         createWindow();
     }
 })
+
+app.on('ready', function()  {
+    if (!isDev) {
+        autoUpdater.on('update-available', (info) => {
+            win.webContents.send('update:available');
+        })
+        autoUpdater.on('update-downloaded', (info) => {
+            win.webContents.send('update:downloaded');
+        });
+        autoUpdater.on('error', (err) => {
+            console.log(err);
+        })
+        autoUpdater.checkForUpdatesAndNotify();
+    }
+});
 
 ipcMain.handle("app:version", app.getVersion);
 

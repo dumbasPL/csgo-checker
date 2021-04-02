@@ -4,43 +4,37 @@
   "description": "csgo-checker",
   "main": "main.js",
   "scripts": {
-    "start": "electron-forge start",
-    "package": "electron-forge package",
-    "make": "electron-forge make"
+    "start": "electron .",
+    "build": "electron-builder --win"
   },
   "author": "dumbasPL",
   "license": "GPL-3.0-or-later",
   "dependencies": {
     "electron-is-dev": "^2.0.0",
-    "electron-squirrel-startup": "^1.0.0",
+    "electron-updater": "^4.3.8",
     "protobufjs": "^6.10.2",
     "simple-json-db": "^1.2.2",
-    "steam-user": "^4.18.0",
-    "update-electron-app": "^2.0.1"
+    "steam-user": "^4.18.0"
   },
   "devDependencies": {
-    "@electron-forge/cli": "^6.0.0-beta.54",
-    "@electron-forge/maker-squirrel": "^6.0.0-beta.54",
-    "@electron-forge/maker-zip": "^6.0.0-beta.54",
-    "electron": "^11.1.1"
+    "electron": "^11.2.1",
+    "electron-builder": "^22.9.1"
   },
-  "config": {
-    "forge": {
-      "packagerConfig": {
-        "icon": "icons/win/icon.ico"
-      },
-      "makers": [
-        {
-          "name": "@electron-forge/maker-squirrel",
-          "config": {
-            "name": "csgo_checker",
-            "setupIcon": "icons/win/icon.ico",
-            "iconUrl": "https://github.com/dumbasPL/csgo-checker/raw/master/icons/win/icon.ico",
-            "setupExe": "CSGO_Checker-installer.exe",
-            "title": "CSGO account checker"
-          }
-        }
+  "build": {
+    "appId": "cc.nezu.csgochecker",
+    "productName": "CSGO account checker",
+    "win": {
+      "artifactName": "CSGO Checker - installer.${ext}",
+      "target": [
+        "nsis"
       ]
-    }
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "dumbasPL",
+        "repo": "csgo-checker"
+      }
+    ]
   }
 }

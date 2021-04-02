@@ -333,6 +333,12 @@
             document.querySelector("#guard-code").value = '';
             modal3.open();
         })
+        ipcRenderer.on('update:available', (event) => {
+            M.toast({html: 'Update available, downloading...'});
+        })
+        ipcRenderer.on('update:downloaded', (event) => {
+            M.toast({html: 'Update downloaded, restart the program to update', displayLength: Infinity});
+        })
         
     </script>
 </body>
