@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Steam account checker</title>
+    <title>CS:GO account checker</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
@@ -42,13 +42,16 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #EF5350;
         }
+        .main {
+            width: 100%;
+        }
     </style>
 </head>
 <body style="background: #333; color: #ddd">
     <div class="navbar-fixed">
         <nav>
             <div class="nav-wrapper red">
-                <a class="brand-logo center">Steam account checker</a>
+                <a class="brand-logo center">CS:GO account checker</a>
                 <ul class="right">
                     <li><a class="btn-flat waves-effect waves-light white-text" id="importtxt" style="margin: 0;"><i class="large material-icons">save_alt</i></a></li>
                     <li><a class="btn-flat waves-effect waves-light white-text modal-trigger" href="#modal1" style="margin: 0;"><i class="large material-icons">add</i></a></li>
@@ -184,7 +187,7 @@
                         td_lvl.innerHTML = lvl;
                         let td_prime = document.createElement('td');
                         let prime_badge = document.createElement('img');
-                        prime_badge.src = 'prime.svg';
+                        prime_badge.src = 'icons/prime.svg';
                         prime_badge.style.filter = prime ? green_filter : red_filter;
                         prime_badge.style.display = prime === undefined || prime === null ? 'none' : 'block';
                         td_prime.appendChild(prime_badge);

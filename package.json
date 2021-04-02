@@ -11,42 +11,34 @@
   "author": "dumbasPL",
   "license": "GPL-3.0-or-later",
   "dependencies": {
+    "electron-is-dev": "^2.0.0",
     "electron-squirrel-startup": "^1.0.0",
     "protobufjs": "^6.10.2",
     "simple-json-db": "^1.2.2",
-    "steam-user": "^4.18.0"
+    "steam-user": "^4.18.0",
+    "update-electron-app": "^2.0.1"
   },
   "devDependencies": {
     "@electron-forge/cli": "^6.0.0-beta.54",
-    "@electron-forge/maker-deb": "^6.0.0-beta.54",
-    "@electron-forge/maker-rpm": "^6.0.0-beta.54",
     "@electron-forge/maker-squirrel": "^6.0.0-beta.54",
     "@electron-forge/maker-zip": "^6.0.0-beta.54",
     "electron": "^11.1.1"
   },
   "config": {
     "forge": {
-      "packagerConfig": {},
+      "packagerConfig": {
+        "icon": "icons/win/icon.ico"
+      },
       "makers": [
         {
           "name": "@electron-forge/maker-squirrel",
           "config": {
-            "name": "csgo_checker"
+            "name": "csgo_checker",
+            "setupIcon": "icons/win/icon.ico",
+            "iconUrl": "https://github.com/dumbasPL/csgo-checker/raw/master/icons/win/icon.ico",
+            "setupExe": "CSGO_Checker-installer.exe",
+            "title": "CSGO account checker"
           }
-        },
-        {
-          "name": "@electron-forge/maker-zip",
-          "platforms": [
-            "darwin"
-          ]
-        },
-        {
-          "name": "@electron-forge/maker-deb",
-          "config": {}
-        },
-        {
-          "name": "@electron-forge/maker-rpm",
-          "config": {}
         }
       ]
     }
