@@ -334,10 +334,10 @@
             modal3.open();
         })
         ipcRenderer.on('update:available', (event) => {
-            M.toast({html: 'Update available, downloading...'});
+            M.toast({html: 'Update available, downloading...', classes: 'green'});
         })
         ipcRenderer.on('update:downloaded', (event) => {
-            M.toast({html: 'Update downloaded, restart the program to update', displayLength: Infinity});
+            M.toast({html: 'Update downloaded, restart the program to update', displayLength: Infinity, classes: 'green'});
         })
         
     </script>
