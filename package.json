@@ -1,11 +1,12 @@
 {
   "name": "csgo-checker",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "csgo-checker",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "build": "electron-builder --win"
+    "build": "electron-builder --win",
+    "publish": "electron-builder --win --publish always"
   },
   "author": "dumbasPL",
   "license": "GPL-3.0-or-later",
@@ -24,7 +25,7 @@
     "appId": "cc.nezu.csgochecker",
     "productName": "CSGO account checker",
     "win": {
-      "artifactName": "CSGO Checker - installer.${ext}",
+      "artifactName": "CSGO Checker installer.${ext}",
       "target": [
         "nsis"
       ]
