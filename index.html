@@ -138,6 +138,7 @@
         M.AutoInit();
         let del_modal = M.Modal.getInstance(document.querySelector('#modal2'));
         const { ipcRenderer, clipboard, shell } = require('electron');
+        const friendCode = require("csgo-friendcode");
         ipcRenderer.invoke("app:version").then(v => document.title += " " + v);
         var update_cycle = -1;
         function countdown(s) {
@@ -197,6 +198,13 @@
                         td_ban.innerHTML = ban;
                         let td_action = document.createElement('td');
                         td_action.className = "actions";
+                        let a_copy_code = document.createElement('a');
+                        a_copy_code.className = "btn-floating btn-small red";
+                        a_copy_code.innerHTML = '<i class="material-icons">code</i>';
+                        a_copy_code.addEventListener('click', async e => {
+                            clipboard.writeText(friendCode.encode(account.steamid), 'selection');
+                            M.toast({html: 'Copied!', classes: 'green'});
+                        });
                         let a_copy = document.createElement('a');
                         a_copy.className = "btn-floating btn-small red";
                         a_copy.innerHTML = '<i class="material-icons">password</i>';
@@ -230,6 +238,7 @@
                                 document.querySelector('.delete-btn').focus();
                             }
                         });
+                        td_action.appendChild(a_copy_code);
                         td_action.appendChild(a_copy);
                         td_action.appendChild(a_refresh);
                         td_action.appendChild(a_delete);

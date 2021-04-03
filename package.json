@@ -11,6 +11,7 @@
   "author": "dumbasPL",
   "license": "GPL-3.0-or-later",
   "dependencies": {
+    "csgo-friendcode": "^3.0.1",
     "electron-is-dev": "^2.0.0",
     "electron-updater": "^4.3.8",
     "protobufjs": "^6.10.2",
