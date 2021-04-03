@@ -1,6 +1,6 @@
 {
   "name": "csgo-checker",
-  "version": "0.1.6",
+  "version": "0.1.6-hotfix1",
   "description": "csgo-checker",
   "main": "main.js",
   "scripts": {

@@ -270,6 +270,7 @@
                         a_open_profile.addEventListener('click', async e => {
                             shell.openExternal('https://steamcommunity.com/profiles/' + account.steamid);
                         });
+                        tr.querySelector(".actions").append(a_open_profile);
                     }
                     if(account.steamid && !tr.querySelector(".copy-code")) {
                         let a_copy_code = document.createElement('a');
