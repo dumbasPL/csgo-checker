@@ -115,10 +115,8 @@ async function process_check_account(username) {
         return res;
     } catch (error) {
         console.log(error);
-        db.set(username, {
-            password: account.password,
-            error: error
-        });
+        account.error = error;
+        db.set(username, account);
         return {
             error: error
         };
