@@ -32,6 +32,7 @@ function createWindow () {
         },
         width: 1100,
         height: 650,
+        minWidth: 960
     });
     win.removeMenu();
     win.loadFile('index.html');
