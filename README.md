@@ -15,8 +15,8 @@
 ## Additional features:
  - import form `user:pass` combo file
  - mass refresh
- - coppy password to clippboard
- - coppy CS:GO friend code to clipboard
+ - copy password to clippboard
+ - copy CS:GO friend code to clipboard
  - steam guard protected accounts supported
 
 ## screenshots
