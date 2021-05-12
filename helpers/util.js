@@ -17,8 +17,8 @@ function penalty_reason_string(id) {
   case 8: 
   case 14: return "Untrusted";
   case 9: return "Kicked Too Much";
-  case 10: return "Overwatch(Cheat)";
-  case 11: return "Overwatch(Grief)";
+  case 10: return "Overwatch (Cheat)";
+  case 11: return "Overwatch (Grief)";
   case 16: return "Failed To Connect";
   case 17: return "Kick Abuse";
   case 18: 
