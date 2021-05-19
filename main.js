@@ -2,6 +2,7 @@ const { app, BrowserWindow, ipcMain, globalShortcut, dialog } = require('electro
 const { autoUpdater } = require('electron-updater');
 const isDev = require('electron-is-dev');
 const JSONdb = require('simple-json-db');
+const got = require('got');
 var User = require('steam-user');
 const fs = require('fs');
 const util = require('util');
@@ -252,6 +253,30 @@ function check_account(username, pass) {
                     }
                 });
             }
+        });
+
+        steamClient.on('webSession', (sessionID, cookies ) => {
+            sleep(1000).then(() => {
+                got(`https://steamcommunity.com/profiles/${steamClient.steamID.getSteamID64()}/gcpd/730?tab=matchmaking`, {
+                    headers: {
+                        'Cookie': cookies.join('; ') + ';'
+                    }
+                }).then(res => {
+                    let mm = /<td>Competitive<\/td><td>\d+<\/td><td>\d+<\/td><td>\d+<\/td><td>\d+<\/td><td>(\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d GMT)<\/td>/.exec(res.body);
+                    let wg = /<td>Wingman<\/td><td>\d+<\/td><td>\d+<\/td><td>\d+<\/td><td>\d+<\/td><td>(\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d GMT)<\/td>/.exec(res.body);
+                    let dz = /<td>Danger Zone<\/td><td>\d+<\/td><td>\d+<\/td><td>\d+<\/td><td>(\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d GMT)<\/td>/.exec(res.body);
+
+                    if (mm) {
+                        data.last_game = new Date(mm[1]);
+                    }
+                    if (wg) {
+                        data.last_game_wg = new Date(wg[1]);
+                    }
+                    if (dz) {
+                        data.last_game_dz = new Date(dz[1]);
+                    }
+                }).catch(e => console.log(e.message));
+            });
         });
 
         steamClient.on('accountLimitations', () => {
