@@ -30,6 +30,45 @@ function getRankImage(rank, wins, type) {
 }
 
 /**
+ * Get rank name for given rank id
+ * @param {Number} rank ranking
+ * @param {Number} wins number of wins
+ * @returns {String} rank name
+ */ 
+function getRankName(rank, wins) {
+  if (rank <= 0) {
+    rank = 0;
+  }
+  switch (rank)
+  {
+    case 0:	
+      if(wins >= 10) {
+        return "Expired";
+      }
+      return "Unranked";
+      case 1:	return "Silver 1";
+      case 2:	return "Silver 2";
+      case 3:	return "Silver 3";
+      case 4:	return "Silver 4";
+      case 5:	return "Silver Elite";
+      case 6:	return "Silver Elite Master";
+      case 7:	return "Gold Nova 1";
+      case 8:	return "Gold Nova 2";
+      case 9:	return "Gold Nova 3";
+      case 10: return "Gold Nova Master";
+      case 11: return "Master Guardian 1";
+      case 12: return "Master Guardian 2";
+      case 13: return "Master Guardian Elite";
+      case 14: return "Distinguished Master Guardian";
+      case 15: return "Legendary Eagle";
+      case 16: return "Legendary Eagle Master";
+      case 17: return "Supreme Master First Class";
+      case 18: return "Global Elite CS GO";
+      default: return `Unknown(${id})`;
+  }
+}
+
+/**
  * Format countdown string
  * @param {Number} seconds seconds remaining
  * @returns formatted string
@@ -151,6 +190,42 @@ function createTagEdit(name, color = '#000000') {
 }
 
 /**
+ * Checks if account matches query string
+ * @param {String} q query
+ * @param {String} login account login
+ * @param {*} account account object
+ * @returns {Boolean} matches? 
+ */
+function execSearch(q, login, account) {
+  
+  q = q.trim();
+  if (q.length == 0) {
+    return true;
+  }
+
+  let strings = [];
+  strings.push(login);
+  strings.push(account.name ?? null);
+  if (account.tags) {
+    account.tags.forEach(tag => {
+      strings.push(tag);
+    });
+  }
+  strings.push(account.prime ? "prime" : null);
+  strings.push(account.error ?? null);
+  strings.push(formatPenalty(account.penalty_reason ?? '?', account.penalty_seconds ?? -1));
+  strings.push(account.steamid ? "" + account.steamid : null)
+  strings.push(getRankName(account.rank ?? 0, account.wins ?? 0));
+  strings.push(getRankName(account.rank_wg ?? 0, account.wins_wg ?? 0));
+  strings.push(getRankName(account.rank_dz ?? 0, account.wins_dz ?? 0));
+
+  return q.toLowerCase().split(' ').map(x => {
+    return strings.find(v => v && v.toLowerCase().includes(x)) != undefined
+  }).reduce((prev, cur) => prev && cur, true);
+
+}
+
+/**
  * Called when a new table row is created
  * @callback createCallback
  * @param {Element} tr newly created table row 
@@ -218,11 +293,16 @@ function updateRow(row, login, account, force) {
     row.querySelector('.ranks .wg').src = getRankImage(account.rank_wg ?? 0, account.wins_wg ?? 0, 'wg');
     row.querySelector('.ranks .dz').src = getRankImage(account.rank_dz ?? 0, account.wins_dz, 'dz');
   
-    row.querySelector('.ranks .mm').title = account.wins < 0 ? '?' :account.wins ?? '?';
+    row.querySelector('.ranks .mm').title = getRankName(account.rank ?? 0, account.wins ?? 0) + 
+      "<br>" + (account.wins < 0 ? '?' : account.wins ?? '?') + " wins";
+    row.querySelector('.ranks .wg').title = getRankName(account.rank_wg ?? 0, account.wins_wg ?? 0) + 
+      "<br>" + (account.wins_wg ?? '?') + " wins";
+    row.querySelector('.ranks .dz').title = getRankName(account.rank_dz ?? 0, account.wins_dz ?? 0) + 
+      "<br>" + (account.wins_dz ?? '?') + " wins";
+
+    
     bootstrap.Tooltip.getInstance(row.querySelector('.ranks .mm'))._fixTitle();
-    row.querySelector('.ranks .wg').title = account.wins_wg ?? '?';
     bootstrap.Tooltip.getInstance(row.querySelector('.ranks .wg'))._fixTitle();
-    row.querySelector('.ranks .dz').title = account.wins_dz ?? '?';
     bootstrap.Tooltip.getInstance(row.querySelector('.ranks .dz'))._fixTitle();
 
     row.querySelector('.ban').innerText = account.error ?? formatPenalty(account.penalty_reason ?? '?', account.penalty_seconds ?? -1)
@@ -532,6 +612,23 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelector('#settings').addEventListener('click', async e => {
     e.preventDefault();
     settingsModal.show();
+  });
+
+
+  document.querySelector('#search').addEventListener('input', e => {
+    let q = e.target.value;
+
+    for (const login in account_cache) {
+      const account = account_cache[login];
+      let matches = execSearch(q, login, account);
+
+      let row = document.querySelector('#acc-' + login);
+      if (row) {
+        row.style.display = matches ? '' : 'none';
+      }
+    }
+
+
   });
   
   updateAccounts();

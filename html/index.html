@@ -16,9 +16,9 @@
       <a class="navbar-brand">CS:GO account checker</a>
       <ul class="navbar-nav me-auto">
       </ul>
-      <!-- <form class="col-4 mb-0 me-3">
-        <input type="search" class="form-control form-control-dark" placeholder="Search...">
-      </form> -->
+      <form class="col-4 mb-0 me-3">
+        <input type="search" class="form-control form-control-dark" id="search" placeholder="Search...">
+      </form>
 
       <div class="text-end">
         <button type="button" class="btn btn-link text-white" id="export" data-bs-toggle="tooltip" data-bs-placement="bottom" title="export to user:pass">
@@ -80,9 +80,9 @@
         <img src="img/prime.svg" alt="prime">
       </td>
       <td class="ranks">
-        <img src="img/skillgroups/skillgroup_none.svg" alt="mm" class="rank-image me-1 mm" data-bs-toggle="tooltip" title="ERROR">
-        <img src="img/skillgroups/wingman_none.svg" alt="wg" class="rank-image me-1 wg" data-bs-toggle="tooltip" title="ERROR">
-        <img src="img/skillgroups/dangerzone_none.svg" alt="dz" class="rank-image me-1 dz" data-bs-toggle="tooltip" title="ERROR">
+        <img src="img/skillgroups/skillgroup_none.svg" alt="mm" class="rank-image me-1 mm" data-bs-toggle="tooltip" data-bs-html="true" title="ERROR">
+        <img src="img/skillgroups/wingman_none.svg" alt="wg" class="rank-image me-1 wg" data-bs-toggle="tooltip" data-bs-html="true" title="ERROR">
+        <img src="img/skillgroups/dangerzone_none.svg" alt="dz" class="rank-image me-1 dz" data-bs-toggle="tooltip" data-bs-html="true" title="ERROR">
       </td>
       <td class="ban"></td>
       <td class="actions">
@@ -242,5 +242,6 @@
 
   <script src="js/bootstrap.bundle.min.js"></script>
   <script src="js/front.js"></script>
+  
 </body>
 </html>
