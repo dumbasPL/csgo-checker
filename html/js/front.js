@@ -107,6 +107,19 @@ function formatPenalty(reason, seconds) {
   return reason + ' - ' + countdown(seconds - Math.floor(Date.now() / 1000));
 }
 
+/**
+ * Formats rank expire time from last played match date
+ * @param {Date} time
+ * @returns {String}
+ */
+function formatExpireTime(time) {
+  time = new Date(time.getTime());
+  //https://github.com/dumbasPL/csgo-checker/issues/3#issuecomment-827474759
+  //this is untested yet, i'm trusting what this guy says.
+  time.setDate(time.getDate() + 30);
+  return time.toLocaleString();
+}
+
 // credit: https://stackoverflow.com/a/11868398/5861427
 /**
  * Calculates the text color for a given background color based on brightness
@@ -226,6 +239,86 @@ function execSearch(q, login, account) {
 }
 
 /**
+ * Handle sorting
+ * @param {Event} e click event
+ */
+function handleSort(e) {
+  e.preventDefault();
+  let elem = e.target;
+
+  while (elem.tagName != 'TH') {
+    elem = elem.parentNode;
+  }
+
+  let col_name = elem.dataset.columnName;
+  let cur_sort_dir = elem.dataset.sortDir;
+
+  if (!col_name) {
+    return;
+  }
+
+  let new_sort_dir;
+  switch (cur_sort_dir) {
+    case 'none':
+      new_sort_dir = 'DESC';
+      break;
+    case 'DESC':
+      new_sort_dir = 'ASC';
+      break;
+    default: // same as case 'ASC'
+      new_sort_dir = 'none';
+      break;
+  }
+
+  let new_order;
+
+  //special case as username is they key
+  if (col_name == "username") {
+    let usernames = Object.keys(account_cache);
+    if (new_sort_dir != 'none') {
+      usernames.sort();
+    }
+    if (new_sort_dir == 'DESC') {
+      usernames.reverse();
+    }
+    new_order = usernames;
+  } else {
+    let accounts = Object.entries(account_cache);
+    //combine bans and errors
+    if (col_name == 'ban') {
+      accounts = accounts.map(a => {
+        a[1].ban = a[1].error ?? formatPenalty(a[1].penalty_reason ?? '?', a[1].penalty_seconds ?? -1);
+        return a;
+      });
+    }
+    if (new_sort_dir != 'none') {
+      accounts.sort((a, b) => {
+        a = a[1];
+        b = b[1];
+        return a[col_name] > b[col_name] ? 1 : -1;
+      });
+    }
+    if (new_sort_dir == 'DESC') {
+      accounts.reverse();
+    }
+    new_order = accounts.map(a => a[0]);
+  }
+
+  document.querySelectorAll('#main-table th.sortable').forEach(e => e.dataset.sortDir = 'none');
+  elem.dataset.sortDir = new_sort_dir;
+
+  let tbody = document.querySelector('#main-table tbody');
+  new_order.forEach(login => {
+    let node = document.getElementById('acc-' + login);
+    tbody.insertBefore(node, null);
+  })
+
+  console.log(new_order);
+
+
+}
+
+/**
  * Called when a new table row is created
  * @callback createCallback
  * @param {Element} tr newly created table row 
@@ -289,21 +382,25 @@ function updateRow(row, login, account, force) {
     row.querySelector('.level').innerText = account.lvl ?? '?';
     row.querySelector('.prime img').className = account.steamid ? account.prime ? 'prime-green' : 'prime-red' : '';
   
-    row.querySelector('.ranks .mm').src = getRankImage(account.rank ?? 0, account.wins ?? 0, 'mm');
-    row.querySelector('.ranks .wg').src = getRankImage(account.rank_wg ?? 0, account.wins_wg ?? 0, 'wg');
-    row.querySelector('.ranks .dz').src = getRankImage(account.rank_dz ?? 0, account.wins_dz, 'dz');
+    row.querySelector('.rank .mm').src = getRankImage(account.rank ?? 0, account.wins ?? 0, 'mm');
+    row.querySelector('.rank .wg').src = getRankImage(account.rank_wg ?? 0, account.wins_wg ?? 0, 'wg');
+    row.querySelector('.rank .dz').src = getRankImage(account.rank_dz ?? 0, account.wins_dz, 'dz');
   
-    row.querySelector('.ranks .mm').title = getRankName(account.rank ?? 0, account.wins ?? 0) + 
-      "<br>" + (account.wins < 0 ? '?' : account.wins ?? '?') + " wins";
-    row.querySelector('.ranks .wg').title = getRankName(account.rank_wg ?? 0, account.wins_wg ?? 0) + 
-      "<br>" + (account.wins_wg ?? '?') + " wins";
-    row.querySelector('.ranks .dz').title = getRankName(account.rank_dz ?? 0, account.wins_dz ?? 0) + 
-      "<br>" + (account.wins_dz ?? '?') + " wins";
+    let mm_expire = account.last_game ? '<br>expires ' + formatExpireTime(new Date(account.last_game)) : '';
+    let wg_expire = account.last_game_wg ? '<br>expires ' + formatExpireTime(new Date(account.last_game_wg)) : '';
+    let dz_expire = account.last_game_dz ? '<br>expires ' + formatExpireTime(new Date(account.last_game_dz)) : '';
+
+    row.querySelector('.rank .mm').title = getRankName(account.rank ?? 0, account.wins ?? 0) + 
+      '<br>' + (account.wins < 0 ? '?' : account.wins ?? '?') + ' wins' + mm_expire;
+    row.querySelector('.rank .wg').title = getRankName(account.rank_wg ?? 0, account.wins_wg ?? 0) + 
+      '<br>' + (account.wins_wg ?? '?') + ' wins' + wg_expire;
+    row.querySelector('.rank .dz').title = getRankName(account.rank_dz ?? 0, account.wins_dz ?? 0) + 
+      '<br>' + (account.wins_dz ?? '?') + ' wins' + dz_expire;
 
     
-    bootstrap.Tooltip.getInstance(row.querySelector('.ranks .mm'))._fixTitle();
-    bootstrap.Tooltip.getInstance(row.querySelector('.ranks .wg'))._fixTitle();
-    bootstrap.Tooltip.getInstance(row.querySelector('.ranks .dz'))._fixTitle();
+    bootstrap.Tooltip.getInstance(row.querySelector('.rank .mm'))._fixTitle();
+    bootstrap.Tooltip.getInstance(row.querySelector('.rank .wg'))._fixTitle();
+    bootstrap.Tooltip.getInstance(row.querySelector('.rank .dz'))._fixTitle();
 
     row.querySelector('.ban').innerText = account.error ?? formatPenalty(account.penalty_reason ?? '?', account.penalty_seconds ?? -1)
 
@@ -628,8 +725,9 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-
   });
+
+  document.querySelectorAll('#main-table th.sortable').forEach(e => e.addEventListener('click', handleSort));
   
   updateAccounts();
 

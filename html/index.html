@@ -16,9 +16,9 @@
       <a class="navbar-brand">CS:GO account checker</a>
       <ul class="navbar-nav me-auto">
       </ul>
-      <form class="col-4 mb-0 me-3">
+      <div class="col-4 mb-0 me-3">
         <input type="search" class="form-control form-control-dark" id="search" placeholder="Search...">
-      </form>
+      </div>
 
       <div class="text-end">
         <button type="button" class="btn btn-link text-white" id="export" data-bs-toggle="tooltip" data-bs-placement="bottom" title="export to user:pass">
@@ -45,17 +45,55 @@
   </nav>
   <main>
 
-    <table class="table table-dark table-striped table-sm my-0" id="main-table">
+    <table class="table table-dark table-sm my-0" id="main-table">
       <thead>
         <tr>
-          <th scope="col">login</th>
-          <th scope="col">name</th>
-          <th scope="col">tags</th>
-          <th scope="col">lvl</th>
-          <th scope="col"></th>
-          <th scope="col">rank (comp/wingman/dz)</th>
-          <th scope="col">ban/error</th>
-          <th scope="col">action</th>
+          <th class="sortable" data-column-name="username" data-sort-dir="none">
+            login
+            <i class="material-icons sort-asc">arrow_drop_up</i>
+            <i class="material-icons sort-desc">arrow_drop_down</i>
+          </th>
+          <th class="sortable" data-column-name="name" data-sort-dir="none">
+            name
+            <i class="material-icons sort-asc">arrow_drop_up</i>
+            <i class="material-icons sort-desc">arrow_drop_down</i>
+          </th>
+          <th class="text-center">
+            tags
+          </th>
+          <th class="sortable" data-column-name="lvl" data-sort-dir="none">
+            lvl
+            <i class="material-icons sort-asc">arrow_drop_up</i>
+            <i class="material-icons sort-desc">arrow_drop_down</i>
+          </th>
+          <th class="sortable text-center" data-column-name="prime" data-sort-dir="none">
+            <img src="img/prime.svg" alt="prime" class="d-inline-block" style="height: 1rem;">
+            <i class="material-icons sort-asc">arrow_drop_up</i>
+            <i class="material-icons sort-desc">arrow_drop_down</i>
+          </th>
+          <th class="sortable text-center" data-column-name="rank" data-sort-dir="none">
+            comp
+            <i class="material-icons sort-asc">arrow_drop_up</i>
+            <i class="material-icons sort-desc">arrow_drop_down</i>
+          </th>
+          <th class="sortable text-center" data-column-name="rank_wg" data-sort-dir="none">
+            wm
+            <i class="material-icons sort-asc">arrow_drop_up</i>
+            <i class="material-icons sort-desc">arrow_drop_down</i>
+          </th>
+          <th class="sortable text-center" data-column-name="rank_dz" data-sort-dir="none">
+            dz
+            <i class="material-icons sort-asc">arrow_drop_up</i>
+            <i class="material-icons sort-desc">arrow_drop_down</i>
+          </th>
+          <th class="sortable text-center" data-column-name="ban" data-sort-dir="none">
+            ban/error
+            <i class="material-icons sort-asc">arrow_drop_up</i>
+            <i class="material-icons sort-desc">arrow_drop_down</i>
+          </th>
+          <th class="text-center">
+            action
+          </th>
         </tr>
       </thead>
       <tbody>
@@ -68,7 +106,7 @@
   <template id="row-template">
     <tr>
       <td class="login"></td>
-      <td class="preloader" colspan="7">
+      <td class="preloader" colspan="10">
         <div class="progress">
           <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%"></div>
         </div>
@@ -79,9 +117,13 @@
       <td class="prime">
         <img src="img/prime.svg" alt="prime">
       </td>
-      <td class="ranks">
+      <td class="rank">
         <img src="img/skillgroups/skillgroup_none.svg" alt="mm" class="rank-image me-1 mm" data-bs-toggle="tooltip" data-bs-html="true" title="ERROR">
+      </td>
+      <td class="rank">
         <img src="img/skillgroups/wingman_none.svg" alt="wg" class="rank-image me-1 wg" data-bs-toggle="tooltip" data-bs-html="true" title="ERROR">
+      </td>
+      <td class="rank">
         <img src="img/skillgroups/dangerzone_none.svg" alt="dz" class="rank-image me-1 dz" data-bs-toggle="tooltip" data-bs-html="true" title="ERROR">
       </td>
       <td class="ban"></td>
