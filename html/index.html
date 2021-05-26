@@ -263,20 +263,44 @@
         <div class="modal-body">
           <h6>Tags:</h6>
           <form id="tag-list">
-            
+            <!-- tags go here -->
           </form>
           <form class="row mt-4">
             <div class="col-4 pe-0">
               <input type="text" class="form-control" id="new-tag" placeholder="new tag name">
             </div>
             <div class="col">
-              <button type="button" class="btn btn-primary" aria-label="Close" id="new-tag-btn">add new</button>
+              <button type="button" class="btn btn-primary" id="new-tag-btn">add new</button>
             </div>
           </form>
+
+          <hr>
+
+          <h6>Accounts:</h6>
+          <button type="button" class="btn btn-danger" data-bs-dismiss="modal" data-bs-target="#confirmDeleteAll" data-bs-toggle="modal">Delete all accounts</button>
+
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
           <button type="button" class="btn btn-primary">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="confirmDeleteAll" tabindex="-1" >
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Delete all accounts?</h5>
+        </div>
+        <div class="modal-body">
+          Are you sure you want to delete all accounts? <br>
+          This can not be undone!
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-danger" data-bs-dismiss="modal" id="delete-all-btn">Delete</button>
         </div>
       </div>
     </div>

@@ -493,8 +493,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let login = deleteConfirmationModal_div.querySelector('input[name=login]').value;
     if (login) {
       await ipcRenderer.invoke('accounts:delete', login);
+      document.getElementById('acc-' + login).remove();
       updateAccounts();
-      document.querySelector('#acc-' + login).remove();
     }
   });
 
@@ -719,7 +719,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const account = account_cache[login];
       let matches = execSearch(q, login, account);
 
-      let row = document.querySelector('#acc-' + login);
+      let row = document.getElementById('acc-' + login)
       if (row) {
         row.style.display = matches ? '' : 'none';
       }
@@ -728,6 +728,12 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   document.querySelectorAll('#main-table th.sortable').forEach(e => e.addEventListener('click', handleSort));
+
+  document.querySelector('#delete-all-btn').addEventListener('click', async e => {
+    await ipcRenderer.invoke('accounts:delete_all');
+    document.querySelectorAll('#main-table tbody tr').forEach(row => row.remove());
+    updateAccounts();
+  })
   
   updateAccounts();
 

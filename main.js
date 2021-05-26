@@ -156,6 +156,8 @@ ipcMain.handle('accounts:update', (_, username, data) => {
 
 ipcMain.handle('accounts:delete', (_, username) => db.delete(username));
 
+ipcMain.handle('accounts:delete_all', (_) => db.deleteAll());
+
 ipcMain.handle('accounts:import', async (event) => {
     let file = await dialog.showOpenDialog(event.sender, { properties: ['openFile'], });
     if (file.canceled) {
