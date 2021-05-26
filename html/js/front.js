@@ -64,7 +64,7 @@ function getRankName(rank, wins) {
       case 16: return "Legendary Eagle Master";
       case 17: return "Supreme Master First Class";
       case 18: return "Global Elite CS GO";
-      default: return `Unknown(${id})`;
+      default: return `Unknown(${rank})`;
   }
 }
 
