@@ -209,7 +209,6 @@ function check_account(username, pass) {
         currently_checking.push(username);
 
         let attempts = 0;
-        // let AcknowledgedPenalty = false;
         let Done = false;
         let steamClient = new User();
 
@@ -230,8 +229,8 @@ function check_account(username, pass) {
                 case 5:  errorStr = `Invalid Password`;         break;
                 case 6:
                 case 34: errorStr = `Logged In Elsewhere`;      break;
-                case 84: errorStr =  `Rate Limit Exceeded`;     break;
-                case 65: errorStr =  `steam guard is invalid`;  break;
+                case 84: errorStr = `Rate Limit Exceeded`;     break;
+                case 65: errorStr = `steam guard is invalid`;  break;
                 default: errorStr = `Unknown: ${e.eresult}`;    break;
             }
             currently_checking = currently_checking.filter(x => x !== username);
@@ -241,13 +240,13 @@ function check_account(username, pass) {
         steamClient.on('steamGuard', (domain, callback) => {
             if (!win) {
                 currently_checking = currently_checking.filter(x => x !== username);
-                reject(`steam guard is enabled`);
+                reject(`steam guard missing`);
             } else {
                 win.webContents.send('steam:steamguard', username);
                 ipcMain.once('steam:steamguard:response', async (event, code) => {
                     if (!code) {
                         currently_checking = currently_checking.filter(x => x !== username);
-                        reject(`steam guard is enabled`);
+                        reject(`steam guard missing`);
                     } else {
                         callback(code);
                     }
@@ -340,26 +339,6 @@ function check_account(username, pass) {
                     }
 
                     let msg = protoDecode(Protos.csgo.CMsgGCCStrike15_v2_MatchmakingGC2ClientHello, payload);
-
-                    // Do we meed this?
-                    // if(!AcknowledgedPenalty && msg.penalty_seconds > 0) {
-                    //     let message = Protos.csgo.CMsgGCCStrike15_v2_AcknowledgePenalty.create({
-                    //         acknowledged: 1
-                    //     });
-                    //     let encoded = Protos.csgo.CMsgGCCStrike15_v2_AcknowledgePenalty.encode(message);
-
-                    //     sleep(2000).then(() => {
-                    //         steamClient.sendToGC(appid, 9171, {}, encoded.finish());
-                    //     });
-
-                    //     AcknowledgedPenalty = true;
-
-                    //     sleep(2000).then(() => {
-                    //         steamClient.sendToGC(appid, 4006, {}, Buffer.alloc(0));
-                    //     });
-
-                    //     return;
-                    // }
 
                     ++attempts;
                     if(msg.ranking === null && attempts < 5 && !msg.vac_banned) {
