@@ -1,7 +1,13 @@
 const equal = require('fast-deep-equal');
 const { ipcRenderer, clipboard, shell } = require('electron');
 const friendCode = require("csgo-friendcode");
-ipcRenderer.invoke("app:version").then(v => document.title += " " + v);
+var showdown  = require('showdown');
+const md_converter = new showdown.Converter();
+let version;
+ipcRenderer.invoke("app:version").then(v => {
+  version = v; 
+  document.title += " " + v;
+});
 
 let account_cache = {};
 let tags_cache = {};
@@ -711,7 +717,6 @@ document.addEventListener('DOMContentLoaded', () => {
     settingsModal.show();
   });
 
-
   document.querySelector('#search').addEventListener('input', e => {
     let q = e.target.value;
 
@@ -733,8 +738,21 @@ document.addEventListener('DOMContentLoaded', () => {
     await ipcRenderer.invoke('accounts:delete_all');
     document.querySelectorAll('#main-table tbody tr').forEach(row => row.remove());
     updateAccounts();
-  })
+  });
+
+  let changeLogModal_div = document.querySelector('#changeLogModal');
+  let changeLogModal = new bootstrap.Modal(changeLogModal_div);
+
+  ipcRenderer.on('update:changelog', (_, markdown) => {
+    if (version) {
+      changeLogModal_div.querySelector('.modal-title').innerText = 'Changelog - ' + version;
+    }
+    changeLogModal_div.querySelector('.modal-body').innerHTML = md_converter.makeHtml(markdown);
+    changeLogModal.show();
+  });
   
   updateAccounts();
+
+  ipcRenderer.invoke('ready');
 
 })

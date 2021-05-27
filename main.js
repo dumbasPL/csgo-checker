@@ -44,7 +44,7 @@ if (!settings.get('tags')) {
     });
 }
 
-//so we can detect updates in the future
+let updated = settings.get('version') != app.getVersion();
 settings.set('version', app.getVersion());
 
 var currently_checking = [];
@@ -60,7 +60,7 @@ function createWindow () {
         minHeight: 625
     });
     win.removeMenu();
-    win.loadFile('html/index.html');
+    win.loadFile(__dirname + '/html/index.html');
     win.webContents.on('before-input-event', (event, input) => {
         if (input.control && input.shift && input.key.toLowerCase() === 'i') {
             win.webContents.openDevTools();
@@ -69,7 +69,8 @@ function createWindow () {
         if (input.control && input.key.toLowerCase() === 'r') {
             win.reload();
         }
-    })
+    });
+
 }
 
 app.whenReady().then(createWindow)
@@ -139,6 +140,12 @@ async function process_check_account(username) {
         return { error: error };
     }
 }
+
+ipcMain.handle('ready', () => {
+    if (win && updated) {
+        win.webContents.send('update:changelog', fs.readFileSync(__dirname + '/changelog.md').toString());
+    }
+});
 
 ipcMain.handle('accounts:check', async (_, username) => await process_check_account(username));
 
