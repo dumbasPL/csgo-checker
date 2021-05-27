@@ -6,16 +6,18 @@
  - migrated ui from materializecss to bootstrap
  - added changelog
  - added dangerzone ranks
+ - added rank icons
  - added rank expiration time
  - added search bar
- - added option to export accounts
+ - added ability to sort accounts by `login`, `name`, `lvl`, `prime starts`, `rank`, `ban status`
+ - added option to export all accounts as `user:pass` combo list
  - added tags
  - added option to edit accounts
  - added settings
  - added `delete all accounts` button in settings
  - updated icon to match the new theme
- - changed minimum window width to 1100px
- - changed minimum window height to 625px
+ - changed minimum window width to `1100px`
+ - changed minimum window height to `625px`
  - ranks are now saved as numbers instead of names
 
 # 0.1.8
