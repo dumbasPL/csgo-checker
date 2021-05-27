@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset='utf-8'>
+  <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+  <title>CS:GO account checker</title>
+  <meta name='viewport' content='width=device-width, initial-scale=1'>
+  <link rel="stylesheet" href="css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/material-icons.css">
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body >
+  
+  <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-danger ">
+    <div class="container-fluid">
+      <a class="navbar-brand">CS:GO account checker</a>
+      <ul class="navbar-nav me-auto">
+      </ul>
+      <div class="col-4 mb-0 me-3">
+        <input type="search" class="form-control form-control-dark" id="search" placeholder="Search...">
+      </div>
+
+      <div class="text-end">
+        <button type="button" class="btn btn-link text-white" id="export" data-bs-toggle="tooltip" data-bs-placement="bottom" title="export all accounts to user:pass">
+          <i class="material-icons">file_upload</i>
+        </button>
+        <button type="button" class="btn btn-link text-white" id="import" data-bs-toggle="tooltip" data-bs-placement="bottom" title="import accounts from user:pass">
+          <i class="material-icons">save_alt</i>
+        </button>
+        
+        <button type="button" class="btn btn-link text-white" id="new-account" data-bs-toggle="tooltip" data-bs-placement="bottom" title="add new account">
+          <i class="material-icons">add</i>
+        </button>
+
+        <button type="button" class="btn btn-link text-white" id="reloadall" data-bs-toggle="tooltip" data-bs-placement="bottom" title="refresh all">
+          <i class="material-icons">refresh</i>
+        </button>
+
+        <button type="button" class="btn btn-link text-white" id="settings" data-bs-toggle="tooltip" data-bs-placement="bottom" title="settings">
+          <i class="material-icons">settings</i>
+        </button>
+      </div>
+
+    </div>
+  </nav>
+  <main>
+
+    <table class="table table-dark table-sm my-0" id="main-table">
+      <thead>
+        <tr>
+          <th class="sortable" data-column-name="username" data-sort-dir="none">
+            login
+            <i class="material-icons sort-asc">arrow_drop_up</i>
+            <i class="material-icons sort-desc">arrow_drop_down</i>
+          </th>
+          <th class="sortable" data-column-name="name" data-sort-dir="none">
+            name
+            <i class="material-icons sort-asc">arrow_drop_up</i>
+            <i class="material-icons sort-desc">arrow_drop_down</i>
+          </th>
+          <th class="text-center">
+            tags
+          </th>
+          <th class="sortable" data-column-name="lvl" data-sort-dir="none">
+            lvl
+            <i class="material-icons sort-asc">arrow_drop_up</i>
+            <i class="material-icons sort-desc">arrow_drop_down</i>
+          </th>
+          <th class="sortable text-center" data-column-name="prime" data-sort-dir="none">
+            <img src="img/prime.svg" alt="prime" class="d-inline-block" style="height: 1rem;">
+            <i class="material-icons sort-asc">arrow_drop_up</i>
+            <i class="material-icons sort-desc">arrow_drop_down</i>
+          </th>
+          <th class="sortable text-center" data-column-name="rank" data-sort-dir="none">
+            comp
+            <i class="material-icons sort-asc">arrow_drop_up</i>
+            <i class="material-icons sort-desc">arrow_drop_down</i>
+          </th>
+          <th class="sortable text-center" data-column-name="rank_wg" data-sort-dir="none">
+            wm
+            <i class="material-icons sort-asc">arrow_drop_up</i>
+            <i class="material-icons sort-desc">arrow_drop_down</i>
+          </th>
+          <th class="sortable text-center" data-column-name="rank_dz" data-sort-dir="none">
+            dz
+            <i class="material-icons sort-asc">arrow_drop_up</i>
+            <i class="material-icons sort-desc">arrow_drop_down</i>
+          </th>
+          <th class="sortable text-center" data-column-name="ban" data-sort-dir="none">
+            ban/error
+            <i class="material-icons sort-asc">arrow_drop_up</i>
+            <i class="material-icons sort-desc">arrow_drop_down</i>
+          </th>
+          <th class="text-center">
+            action
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        
+      </tbody>
+    </table>
+
+  </main>
+
+  <template id="row-template">
+    <tr>
+      <td class="login"></td>
+      <td class="preloader" colspan="10">
+        <div class="progress">
+          <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%"></div>
+        </div>
+      </td>
+      <td class="steam_name"></td>
+      <td class="tags"></td>
+      <td class="level"></td>
+      <td class="prime">
+        <img src="img/prime.svg" alt="prime">
+      </td>
+      <td class="rank">
+        <img src="img/skillgroups/skillgroup_none.svg" alt="mm" class="rank-image me-1 mm" data-bs-toggle="tooltip" data-bs-html="true" title="ERROR">
+      </td>
+      <td class="rank">
+        <img src="img/skillgroups/wingman_none.svg" alt="wg" class="rank-image me-1 wg" data-bs-toggle="tooltip" data-bs-html="true" title="ERROR">
+      </td>
+      <td class="rank">
+        <img src="img/skillgroups/dangerzone_none.svg" alt="dz" class="rank-image me-1 dz" data-bs-toggle="tooltip" data-bs-html="true" title="ERROR">
+      </td>
+      <td class="ban"></td>
+      <td class="actions">
+        <a href="#!" class="text-white text-decoration-none copy-code" data-bs-toggle="tooltip" title="copy CS:GO friend code">
+          <i class="material-icons">people</i>
+        </a>
+        <a href="#!" class="text-white text-decoration-none copy-passwd" data-bs-toggle="tooltip" title="copy password">
+          <i class="material-icons">password</i>
+        </a>
+        <a href="#!" class="text-white text-decoration-none open-pofile" data-bs-toggle="tooltip" title="Steam profile">
+          <i class="material-icons">launch</i>
+        </a>
+        <a href="#!" class="text-white text-decoration-none refresh" data-bs-toggle="tooltip" title="refresh">
+          <i class="material-icons">refresh</i>
+        </a>
+        <a href="#!" class="text-white text-decoration-none delete" data-bs-toggle="tooltip" title="delete">
+          <i class="material-icons">delete</i>
+        </a>
+        <a href="#!" class="text-white text-decoration-none edit" data-bs-toggle="tooltip" title="edit">
+          <i class="material-icons">edit</i>
+        </a>
+      </td>
+    </tr>
+  </template>
+
+  <template id="badge-template">
+    <span class="badge rounded-pill"></span>
+  </template>
+
+  <template id="toast-template">
+    <div class="toast" role="alert">
+      <div class="toast-body"></div>
+    </div>
+  </template>
+
+  <template id="settings-tags-template">
+    <div class="row">
+      <div class="col-4 pe-0">
+        <input type="text" readonly class="form-control-plaintext">
+      </div>
+      <div class="col d-flex">
+        <input type="color" class="form-control form-control-color">
+        <button type="button" class="btn">
+          <i class="material-icons">delete</i>
+        </button>
+      </div>
+    </div>
+  </template>
+  
+  <div class="position-relative vh-100 pe-none">
+    <div class="toast-container position-absolute bottom-0 start-0 p-3">
+      <!-- toasts will go here -->
+    </div>
+  </div>
+
+  <div class="modal fade" id="confirmDeleteAccount" tabindex="-1" >
+    <div class="modal-dialog modal-dialog-centered">
+      <input type="hidden" name="login">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Delete account?</h5>
+        </div>
+        <div class="modal-body">
+          Are you sure you want to delete the account?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-danger">Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="editAccountModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"></h5>
+        </div>
+        <div class="modal-body">
+          <form>
+            <div class="mb-3">
+              <label for="user-name" class="col-form-label">Username:</label>
+              <input type="text" class="form-control" id="user-name">
+            </div>
+            <div class="mb-3">
+              <label for="user-passwd" class="col-form-label">Password:</label>
+              <div class="input-group showHidePassword">
+                <input type="password" class="form-control" id="user-passwd">
+                <a href="#" class="text-decoration-none text-dark input-group-text"><i class="material-icons">visibility_off</i></a>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label for="user-tags" class="col-form-label">Tags: <span class="text-muted">Hold Ctrl to select multiple</span></label>
+              <select class="form-select" multiple id="user-tags">
+              </select>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="steamGuardModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Steam Guard</h5>
+        </div>
+        <div class="modal-body">
+          <form>
+            <div class="mb-3">
+              <label for="steam-guard" class="col-form-label">Steam Guard for account <span id="steam-guard-username"></span>:</label>
+              <input type="text" class="form-control" id="steam-guard">
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary">Send</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="settingsModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Settings</h5>
+        </div>
+        <div class="modal-body">
+          <h6>Tags:</h6>
+          <form id="tag-list">
+            <!-- tags go here -->
+          </form>
+          <form class="row mt-4">
+            <div class="col-4 pe-0">
+              <input type="text" class="form-control" id="new-tag" placeholder="new tag name">
+            </div>
+            <div class="col">
+              <button type="button" class="btn btn-primary" id="new-tag-btn">add new</button>
+            </div>
+          </form>
+
+          <hr>
+
+          <h6>Accounts:</h6>
+          <button type="button" class="btn btn-danger" data-bs-dismiss="modal" data-bs-target="#confirmDeleteAll" data-bs-toggle="modal">Delete all accounts</button>
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="confirmDeleteAll" tabindex="-1" >
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Delete all accounts?</h5>
+        </div>
+        <div class="modal-body">
+          Are you sure you want to delete all accounts? <br>
+          This can not be undone!
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-danger" data-bs-dismiss="modal" id="delete-all-btn">Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="changeLogModal" tabindex="-1" >
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Changelog</h5>
+        </div>
+        <div class="modal-body">
+          
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/bootstrap.bundle.min.js"></script>
+  <script src="js/front.js"></script>
+  
+</body>
+</html>

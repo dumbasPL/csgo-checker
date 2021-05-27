@@ -1,0 +1,61 @@
+# 1.0.0
+
+**⚠️ Data storage format changed, please refresh all accounts for ranks to display correctly ⚠️**
+
+ - ui overhaul
+ - migrated ui from materializecss to bootstrap
+ - added changelog
+ - added dangerzone ranks
+ - added rank expiration time
+ - added search bar
+ - added option to export accounts
+ - added tags
+ - added option to edit accounts
+ - added settings
+ - added `delete all accounts` button in settings
+ - updated icon to match the new theme
+ - changed minimum window width to 1100px
+ - changed minimum window height to 625px
+ - ranks are now saved as numbers instead of names
+
+# 0.1.8
+ - fixed autoupdater
+
+# 0.1.7
+ - fixed missing `open in browser` button accidentally deleted in last release
+
+# 0.1.6
+ - errors no longer reset account info
+ - set minimum window width to 960px
+ - added copy friend code button
+
+# 0.1.5
+ - renamed to CS:GO account checker to more accurately represent the main task of this software
+ - added checking for prime
+ - added icon
+ - added installer
+ - added auto-updater
+ - minor bug fixes
+
+# 0.1.4
+ - fixed overwatch bans appearing as VAC bans
+ - added Steam Guard support
+
+# 0.1.3
+ - added wingman ranks
+ - added import from combo list (`user:pass` format, one per line)
+ - added delete confirmation(ctrl + click to delete without confirmation)
+ - added option to open steam profile in the browser for account
+ - made navbar and table header sticky
+ - changed icon for "copy password"
+ - fixed some bugs
+
+# 0.1.2
+ - added private levels
+ - added community ban detection
+
+# 0.1.1
+ - first release
+
+# 0.1.0
+ - initial pre-release
