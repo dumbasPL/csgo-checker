@@ -1,5 +1,6 @@
 module.exports = {
   penalty_reason_string,
+  penalty_reason_permanent,
   protoDecode,
   protoEncode
 }
@@ -26,6 +27,18 @@ function penalty_reason_string(id) {
   case 19: 
   case 20: return "Rank Calibration";
   default: return `Unknown(${id})`;
+  }
+}
+
+function penalty_reason_permanent(id) {
+  switch (id)
+  {
+  case 8: 
+  case 14:
+  case 10:
+    return true;
+  default: 
+    return false;
   }
 }
 

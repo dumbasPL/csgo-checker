@@ -7,7 +7,7 @@ var User = require('steam-user');
 const fs = require('fs');
 const util = require('util');
 const {EOL} = require('os');
-const { penalty_reason_string, protoDecode, protoEncode } = require('./helpers/util.js');
+const { penalty_reason_string, protoDecode, protoEncode, penalty_reason_permanent } = require('./helpers/util.js');
 const Protos = require('./helpers/protos.js')([{
     name: 'csgo',
     protos: [
@@ -361,7 +361,7 @@ function check_account(username, pass) {
                             currently_checking = currently_checking.filter(x => x !== username);
                             // console.log(util.inspect(msg, false, null));
                             data.penalty_reason = steamClient.limitations.communityBanned ? 'Community ban' : msg.penalty_reason > 0 ? penalty_reason_string(msg.penalty_reason) : msg.vac_banned ? 'VAC' : 0;
-                            data.penalty_seconds = msg.vac_banned || steamClient.limitations.communityBanned ? -1 : msg.penalty_seconds > 0 ? (Math.floor(Date.now() / 1000) + msg.penalty_seconds) : 0;
+                            data.penalty_seconds = msg.vac_banned || steamClient.limitations.communityBanned || penalty_reason_permanent(msg.penalty_reason) ? -1 : msg.penalty_seconds > 0 ? (Math.floor(Date.now() / 1000) + msg.penalty_seconds) : 0;
                             data.wins = msg.vac_banned ? -1 : attempts < 5 ? msg.ranking.wins : 0;
                             data.rank = msg.vac_banned ? -1 : attempts < 5 ? msg.ranking.rank_id : 0;
                             data.name = steamClient.accountInfo.name;
