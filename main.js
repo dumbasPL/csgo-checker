@@ -315,13 +315,6 @@ function check_account(username, pass) {
                                 continue;
                             }
                             switch (cache_object.type_id) {
-                            case 2: {
-                                let CSOPersonaDataPublic = protoDecode(Protos.csgo.CSOPersonaDataPublic, cache_object.object_data[0]);
-                                if (CSOPersonaDataPublic.player_level >= 21) { //has lvl 21 or grater
-                                    data.prime = true;
-                                }
-                                break;
-                            }
                             case 7: {
                                 let CSOEconGameAccountClient = protoDecode(Protos.csgo.CSOEconGameAccountClient, cache_object.object_data[0]);
                                 if ((CSOEconGameAccountClient.bonus_xp_usedflags & 16) != 0) { // EXPBonusFlag::PrestigeEarned
