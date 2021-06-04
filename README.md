@@ -6,18 +6,20 @@
 ## Checks CS:GO accounts for:
  - bans (vac/overwatch/untrusted)
  - cooldowns (abandon, team damage, etc)
- - matchamking rank (competetive and wingman)
- - matchamking wins (competetive and wingman)
- - profile rank
+ - matchmaking rank/wins/rank expiration time (competitive, wingman and dangerzone)
+ - CS:GO profile rank
  - prime status
  - steam profile name
 
 ## Additional features:
- - import form `user:pass` combo file
+ - import/export form/to `user:pass` combo file
  - mass refresh
- - copy password to clippboard
+ - copy password to clipboard
  - copy CS:GO friend code to clipboard
+ - search bar
+ - tags
+ - sorting
  - steam guard protected accounts supported
 
 ## screenshots
-![image](https://user-images.githubusercontent.com/29180158/113456508-afcf0d80-940d-11eb-910c-c92efea5f8d3.png)
+![image](https://user-images.githubusercontent.com/29180158/119862011-56202680-bf18-11eb-97db-229ff5c13535.png)
