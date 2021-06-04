@@ -1,3 +1,7 @@
+# 1.0.1
+ - fixed overwatch bans showing remaining time
+ - updated checker logic to latest game update
+
 # 1.0.0
 
 **⚠️ Data storage format changed, please refresh all accounts for ranks to display correctly ⚠️**
