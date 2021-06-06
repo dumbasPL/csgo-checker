@@ -597,7 +597,7 @@ document.addEventListener('DOMContentLoaded', () => {
  
     if (!username.disabled) { //if login is enabled then we are adding new account
       await ipcRenderer.invoke('accounts:add', username.value, password.value);
-      await ipcRenderer.invoke('accounts:update', username, {
+      await ipcRenderer.invoke('accounts:update', username.value, {
         tags: tag_values
       });
       let ret = ipcRenderer.invoke('accounts:check', username.value);

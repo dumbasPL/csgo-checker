@@ -1,3 +1,6 @@
+# 1.0.2
+ - fixed tags not being saved when adding new account
+
 # 1.0.1
  - fixed overwatch bans showing remaining time
  - updated checker logic to latest game update
