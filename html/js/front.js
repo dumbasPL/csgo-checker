@@ -432,24 +432,22 @@ async function updateAccounts(force = false) {
   tags_cache = await ipcRenderer.invoke('settings:get', 'tags');
   const accounts = await ipcRenderer.invoke('accounts:get');
   for (const login in accounts) {
-    const account = accounts[login];
-
     let row = FindOrCreateRow(login, tr => {
       tr.querySelector('.copy-code').addEventListener('click', e => {
         e.preventDefault();
-        clipboard.writeText(friendCode.encode(account.steamid), 'selection');
+        clipboard.writeText(friendCode.encode(account_cache[login].steamid), 'selection');
         showToast('Code copied to clipboard', 'success');
       });
 
       tr.querySelector('.copy-passwd').addEventListener('click', e => {
         e.preventDefault();
-        clipboard.writeText(account.password, 'selection');
+        clipboard.writeText(account_cache[login].password, 'selection');
         showToast('Password copied to clipboard', 'success');
       });
 
       tr.querySelector('.open-pofile').addEventListener('click', e => {
         e.preventDefault();
-        shell.openExternal('https://steamcommunity.com/profiles/' + account.steamid);
+        shell.openExternal('https://steamcommunity.com/profiles/' + account_cache[login].steamid);
       });
 
       tr.querySelector('.refresh').addEventListener('click', async e => {
@@ -481,7 +479,7 @@ async function updateAccounts(force = false) {
       });
     });
 
-    updateRow(row, login, account, force);
+    updateRow(row, login, accounts[login], force);
 
   }
   update_cycle = setTimeout(updateAccounts, 500);
