@@ -1,6 +1,7 @@
 # 1.0.2
  - fixed tags not being saved when adding new account
  - fixed some action buttons not working on newly added accounts
+ - fixed accounts not automatically refreshing after being added
 
 # 1.0.1
  - fixed overwatch bans showing remaining time

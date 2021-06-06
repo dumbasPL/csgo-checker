@@ -612,6 +612,13 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       updateAccounts();
     }
+    let promise = ipcRenderer.invoke('accounts:check', login);
+    updateAccounts();
+    let ret = await promise;
+    if(ret.error) {
+      showToast(login + ': ' + ret.error, 'danger');
+    }
+    updateAccounts();
   });
 
   let steamGuardModal_div = document.querySelector('#steamGuardModal');
