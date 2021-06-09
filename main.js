@@ -1,12 +1,12 @@
-const { app, BrowserWindow, ipcMain, globalShortcut, dialog } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const { autoUpdater } = require('electron-updater');
 const isDev = require('electron-is-dev');
 const JSONdb = require('simple-json-db');
 const got = require('got');
-var User = require('steam-user');
+const User = require('steam-user');
+const SteamTotp = require('steam-totp');
 const fs = require('fs');
-const util = require('util');
-const {EOL} = require('os');
+const { EOL } = require('os');
 const { penalty_reason_string, protoDecode, protoEncode, penalty_reason_permanent } = require('./helpers/util.js');
 const Protos = require('./helpers/protos.js')([{
     name: 'csgo',
@@ -25,6 +25,8 @@ if (isDev) {
         require('electron-reload')(__dirname);
     } catch (_) { }
 }
+
+let steamTimeOffset = null;
 
 let win = null
 
@@ -124,7 +126,7 @@ async function process_check_account(username) {
     }
 
     try {
-        const res = await check_account(username, account.password);
+        const res = await check_account(username, account.password, account.sharedSecret);
         console.log(res);
         for (const key in res) {
             if (Object.hasOwnProperty.call(res, key)) {
@@ -154,9 +156,7 @@ ipcMain.handle('accounts:add', (_, username, password) => db.set(username, { pas
 ipcMain.handle('accounts:update', (_, username, data) => {
     let account = db.get(username);
     for (const key in data) {
-        if (Object.hasOwnProperty.call(data, key)) {
-            account[key] = data[key];
-        }
+        account[key] = data[key];
     }
     db.set(username, account);
 });
@@ -208,7 +208,14 @@ ipcMain.handle("settings:get", (_, type) => settings.get(type));
 
 ipcMain.handle("settings:set", (_, type, value) => settings.set(type, value));
 
-function check_account(username, pass) {
+/**
+ * Logs on to specified account and performs all checks
+ * @param {string} username login
+ * @param {string} pass password
+ * @param {string} [sharedSecret] mobile authenticator shared secret
+ * @returns {Promise}
+ */
+function check_account(username, pass, sharedSecret) {
     return new Promise((resolve, reject) => {
         sleep = (ms) => {
             return new Promise(resolve=>{
@@ -247,7 +254,21 @@ function check_account(username, pass) {
         });
 
         steamClient.on('steamGuard', (domain, callback) => {
-            if (!win) {
+            if (domain == null && sharedSecret && sharedSecret.length > 0) { //domain will be null for mobile authenticator
+                if (steamTimeOffset == null) {
+                    SteamTotp.getTimeOffset((err, offset) => {
+                        if (err) {
+                            currently_checking = currently_checking.filter(x => x !== username);
+                            reject(`unable to get steam time offset`);
+                            return
+                        }
+                        steamTimeOffset = offset;
+                        callback(SteamTotp.getAuthCode(sharedSecret, steamTimeOffset));
+                    });
+                    return;
+                }
+                callback(SteamTotp.getAuthCode(sharedSecret, steamTimeOffset));
+            } else if (!win) {
                 currently_checking = currently_checking.filter(x => x !== username);
                 reject(`steam guard missing`);
             } else {

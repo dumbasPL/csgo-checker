@@ -506,13 +506,14 @@ document.addEventListener('DOMContentLoaded', () => {
   let editAccountModal = new bootstrap.Modal(editAccountModal_div);
   
   editAccountModal_div.addEventListener('show.bs.modal', async e => {
-    //hide password by default
-    editAccountModal_div.querySelector('.showHidePassword input').setAttribute('type', 'password');
-    editAccountModal_div.querySelector('.showHidePassword i').innerText = 'visibility_off';
+    //hide password and shared secret by default
+    editAccountModal_div.querySelectorAll('.showHidePassword input').forEach(elem => elem.setAttribute('type', 'password'));
+    editAccountModal_div.querySelectorAll('.showHidePassword i').forEach(elem => elem.innerText = 'visibility_off');
 
     let title = editAccountModal_div.querySelector('.modal-title');
     let username = editAccountModal_div.querySelector('#user-name');
     let password = editAccountModal_div.querySelector('#user-passwd');
+    let secret = editAccountModal_div.querySelector('#user-secret');
     let tags = editAccountModal_div.querySelector('#user-tags');
 
     await ipcRenderer.invoke('settings:get', 'tags').then(new_tags => {
@@ -541,6 +542,7 @@ document.addEventListener('DOMContentLoaded', () => {
       username.value = '';
       username.disabled = false;
       password.value = '';
+      secret.value = '';
     } else {
       let login = e.relatedTarget;
       let account = account_cache[login];
@@ -549,6 +551,7 @@ document.addEventListener('DOMContentLoaded', () => {
       username.value = login;
       username.disabled = true;
       password.value = account.password;
+      secret.value = account.sharedSecret ?? '';
       (account.tags ?? []).forEach(tag => {
         let opt = tags.querySelector('option[value="' + tag + '"]');
         if (!opt) {
@@ -590,13 +593,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let username = editAccountModal_div.querySelector('#user-name');
     let password = editAccountModal_div.querySelector('#user-passwd');
+    let secret = editAccountModal_div.querySelector('#user-secret');
     let tags = editAccountModal_div.querySelector('#user-tags');
     let tag_values = [...tags.selectedOptions].map(x => x.value).filter(x => x != '-- no tags --');
  
     if (!username.disabled) { //if login is enabled then we are adding new account
       await ipcRenderer.invoke('accounts:add', username.value, password.value);
       await ipcRenderer.invoke('accounts:update', username.value, {
-        tags: tag_values
+        tags: tag_values,
+        sharedSecret: secret.value.trim().length > 0 ? secret.value : undefined 
       });
       let ret = ipcRenderer.invoke('accounts:check', username.value);
       updateAccounts();
@@ -608,7 +613,8 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       await ipcRenderer.invoke('accounts:update', username.value, {
         password: password.value,
-        tags: tag_values
+        tags: tag_values,
+        sharedSecret: secret.value.trim().length > 0 ? secret.value : undefined 
       });
       updateAccounts();
     }
