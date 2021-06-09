@@ -1,3 +1,6 @@
+# 1.1.0
+  - added support for shared secrets #5
+
 # 1.0.2
  - fixed tags not being saved when adding new account
  - fixed some action buttons not working on newly added accounts
