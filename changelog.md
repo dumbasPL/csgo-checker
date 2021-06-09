@@ -1,5 +1,5 @@
 # 1.1.0
-  - added support for shared secrets #5
+  - added support for shared secrets ([#5](https://github.com/dumbasPL/csgo-checker/issues/5))
 
 # 1.0.2
  - fixed tags not being saved when adding new account
