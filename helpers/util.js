@@ -26,6 +26,7 @@ function penalty_reason_string(id) {
   case 18: 
   case 19: 
   case 20: return "Rank Calibration";
+  case 21: return "Reports (Grief)"
   default: return `Unknown(${id})`;
   }
 }
