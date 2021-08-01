@@ -114,3 +114,19 @@ th {
 th.sortable[data-sort-dir="ASC"] .sort-asc, th.sortable[data-sort-dir="DESC"] .sort-desc {
   display: inline-block;
 }
+
+.setup-encryption .btn-success {
+  display: initial;
+}
+
+#setup-encryption.encrypted .btn-success {
+  display: none;
+}
+
+#setup-encryption .btn-danger {
+  display: none;
+}
+
+#setup-encryption.encrypted .btn-danger {
+  display: initial;
+}
