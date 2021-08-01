@@ -35,6 +35,16 @@ db.sync(); //makes empty file on first run
 const settings = new JSONdb(app.getPath('userData') + '/settings.json');
 settings.sync(); //makes empty file on first run
 
+
+function beforeWindowInputHandler(window, event, input) {
+    if (input.control && input.shift && input.key.toLowerCase() === 'i') {
+        window.webContents.openDevTools();
+        event.preventDefault();
+    }
+    if (input.control && input.key.toLowerCase() === 'r') {
+        window.reload();
+    }
+}
 // add some defaults
 if (!settings.get('tags')) {
     settings.set('tags', {
@@ -63,15 +73,7 @@ function createWindow () {
     });
     win.removeMenu();
     win.loadFile(__dirname + '/html/index.html');
-    win.webContents.on('before-input-event', (event, input) => {
-        if (input.control && input.shift && input.key.toLowerCase() === 'i') {
-            win.webContents.openDevTools();
-            event.preventDefault();
-        }
-        if (input.control && input.key.toLowerCase() === 'r') {
-            win.reload();
-        }
-    });
+    win.webContents.on('before-input-event', (event, input) => beforeWindowInputHandler(win, event, input));
 
 }
 
