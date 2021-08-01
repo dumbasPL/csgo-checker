@@ -203,6 +203,134 @@ app.on('ready', function()  {
     }
 });
 
+ipcMain.on('encryption:password', (_, password) => passwordPromptResponse = password);
+
+ipcMain.handle('encryption:setup', async () => {
+    let pass = await new Promise((resolve, reject) => {
+        passwordPromptResponse = null;
+        let promptWindow = new BrowserWindow({
+            parent: win,
+            modal: true,
+            webPreferences: {
+                nodeIntegration: true,
+            },
+            width: 500,
+            height: 375,
+            resizable: false,
+            show: false
+        });
+        promptWindow.removeMenu();
+        promptWindow.loadFile(__dirname + '/html/encryption_setup.html');
+        promptWindow.webContents.on('before-input-event', (event, input) => beforeWindowInputHandler(promptWindow, event, input));
+        promptWindow.once('ready-to-show', () => promptWindow.show())
+        promptWindow.on('closed', () => {
+            if (passwordPromptResponse == null) {
+                resolve(null);
+            }
+            resolve(passwordPromptResponse);
+            promptWindow = null;
+        })
+    });
+    if (pass == null) { //no data submitted
+        return false;
+    }
+    try {
+        db = await new Promise((res, rej) => {
+            try {
+                let new_db = new EncryptedStorage(app.getPath('userData') + '/accounts.encrypted.json', pass, {
+                    newData: db.JSON()
+                });
+                new_db.on('error', rej);//this is for async errors
+                new_db.on('loaded', () => res(new_db));
+            } catch (error) {
+                rej(error);
+            }
+        });
+        //delete plain text file
+        fs.unlinkSync(app.getPath('userData') + '/accounts.json');
+        settings.set('encrypted', true);
+        return true;
+    } catch (error) {
+        console.log(error);
+        return false;
+    }
+});
+
+ipcMain.handle('encryption:remove', async () => {
+    let error_message = null;
+    while (true) {
+        let pass = await new Promise((resolve, reject) => {
+            passwordPromptResponse = null;
+            let promptWindow = new BrowserWindow({
+                parent: win,
+                modal: true,
+                webPreferences: {
+                    nodeIntegration: true,
+                },
+                width: 500,
+                height: 280,
+                resizable: false,
+                show: false
+            });
+            promptWindow.removeMenu();
+            promptWindow.loadFile(__dirname + '/html/password.html').then(() => {
+                promptWindow.webContents.send('password_dialog:init', error_message, 'Remove encryption');
+            })
+            promptWindow.webContents.on('before-input-event', (event, input) => beforeWindowInputHandler(promptWindow, event, input));
+            promptWindow.once('ready-to-show', () => promptWindow.show())
+            promptWindow.on('closed', () => {
+                if (passwordPromptResponse == null) {
+                    resolve(null);
+                }
+                resolve(passwordPromptResponse);
+                promptWindow = null;
+            })
+        });
+        if (pass == null) { //no data submitted
+            return true; //true is fail as we are still encrypted
+        }
+        try {
+            if (pass.length == 0) {
+                throw 'Password can not be empty';
+            }
+            //attempt to decrypt using this password
+            let temp_db = await new Promise((res, rej) => {
+                try {
+                    let new_db = new EncryptedStorage(app.getPath('userData') + '/accounts.encrypted.json', pass);
+                    new_db.on('error', rej);//this is for async errors
+                    new_db.on('loaded', () => res(new_db));
+                } catch (error) {
+                    rej(error);
+                }
+            });
+            db = new JSONdb(app.getPath('userData') + '/accounts.json');
+            db.JSON(temp_db.JSON());
+            db.sync();
+
+            temp_db = null;
+
+            //delete encrypted file
+            fs.unlinkSync(app.getPath('userData') + '/accounts.encrypted.json');
+            settings.set('encrypted', false);
+            return false; //false is success as in non encrypted
+        } catch (error) {
+            console.log(error);
+            if (typeof error != 'string') {
+                if (error.reason == 'BAD_DECRYPT') {
+                    error = 'Invalid password';
+                }
+                else if (error.code) {
+                    error = error.code;
+                }
+                else {
+                    error = error.toString();
+                }
+            }
+            error_message = error;
+        }
+    }
+});
+
 ipcMain.handle('app:version', app.getVersion);
 
 ipcMain.handle('accounts:get', () => {
