@@ -1,5 +1,7 @@
 # 1.1.0
   - added support for shared secrets ([#5](https://github.com/dumbasPL/csgo-checker/issues/5))
+  - added new cooldown reason `Reports (Grief)`
+  - added encryption (can be enabled in settings)
 
 # 1.0.2
  - fixed tags not being saved when adding new account
