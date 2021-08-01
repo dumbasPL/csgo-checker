@@ -503,6 +503,7 @@ async function updateAccounts(force = false) {
           await ipcRenderer.invoke('accounts:delete', login);
           updateAccounts();
           tr.remove();
+          document.querySelectorAll('.tooltip').forEach(elem => elem.remove()); //remove all tooltips when ctrl click deleting (I think this will leak memory in bootstrap, oh well, to lazy to do properly)
         } else {
           let modal_div = document.querySelector('#confirmDeleteAccount');
           modal_div.querySelector('input[name=login]').value = login;

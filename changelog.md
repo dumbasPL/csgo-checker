@@ -3,6 +3,7 @@
   - added new cooldown reason `Reports (Grief)`
   - added encryption (can be enabled in settings)
   - search and sorting now updates correctly when account data changes ([#6](https://github.com/dumbasPL/csgo-checker/issues/6))
+  - fixed tooltips not disappearing after deleting account without confirmation
 
 # 1.0.2
  - fixed tags not being saved when adding new account
