@@ -1,7 +1,8 @@
 const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const { autoUpdater } = require('electron-updater');
 const isDev = require('electron-is-dev');
-const JSONdb = require('simple-json-db');
+const EncryptedStorage = require('./EncryptedStorage.js');
+let JSONdb = require('simple-json-db');
 const got = require('got');
 const User = require('steam-user');
 const SteamTotp = require('steam-totp');
@@ -30,11 +31,16 @@ let steamTimeOffset = null;
 
 let win = null
 
-const db = new JSONdb(app.getPath('userData') + '/accounts.json');
-db.sync(); //makes empty file on first run
+let passwordPromptResponse = null;
+
 const settings = new JSONdb(app.getPath('userData') + '/settings.json');
 settings.sync(); //makes empty file on first run
 
+//will be initialized later
+/**
+ * @type {JSONdb}
+ */
+var db = null;
 
 function beforeWindowInputHandler(window, event, input) {
     if (input.control && input.shift && input.key.toLowerCase() === 'i') {
@@ -45,6 +51,84 @@ function beforeWindowInputHandler(window, event, input) {
         window.reload();
     }
 }
+
+async function openDB() {
+    try {
+        if (db) {
+            db.sync(); //force save before switch
+            db = null;
+        }
+        if (settings.get('encrypted')) {
+            let error_message = null;
+            while (true) {
+                let pass = await new Promise((resolve, reject) => {
+                    passwordPromptResponse = null;
+                    let promptWindow = new BrowserWindow({
+                        webPreferences: {
+                            nodeIntegration: true,
+                        },
+                        width: 500,
+                        height: 280,
+                        resizable: false,
+                        show: false
+                    });
+                    promptWindow.removeMenu();
+                    promptWindow.loadFile(__dirname + '/html/password.html').then(() => {
+                        promptWindow.webContents.send('password_dialog:init', error_message);
+                    })
+                    promptWindow.webContents.on('before-input-event', (event, input) => beforeWindowInputHandler(promptWindow, event, input));
+                    promptWindow.once('ready-to-show', () => promptWindow.show())
+                    promptWindow.on('closed', () => {
+                        if (passwordPromptResponse == null) {
+                            return app.quit();
+                        }
+                        resolve(passwordPromptResponse);
+                        promptWindow = null;
+                    })
+                });
+                try {
+                    if (pass == null || pass.length == 0) {
+                        throw 'Password can not be empty';
+                    }
+                    db = await new Promise((res, rej) => {
+                        try {
+                            let db = new EncryptedStorage(app.getPath('userData') + '/accounts.encrypted.json', pass);
+                            db.on('error', rej);//this is for async errors
+                            db.on('loaded', () => res(db));
+                        } catch (error) {
+                            rej(error);
+                        }
+                    })
+                    //we decrypted successfully, exit loop
+                    break;
+                } catch (error) {
+                    if (typeof error != 'string') {
+                        if (error.reason == 'BAD_DECRYPT') {
+                            error = 'Invalid password';
+                        }
+                        else if (error.code) {
+                            error = error.code;
+                        }
+                        else {
+                            error = error.toString();
+                        }
+                    }
+                    error_message = error;
+                }
+            }
+            return;
+        }
+        db = new JSONdb(app.getPath('userData') + '/accounts.json');
+        db.sync();
+    } catch (error) {
+        await dialog.showMessageBox(null, {
+            title: 'openDB Error',
+            message: error.toString(),
+            type: 'error'
+        });
+    }
+}
+
 // add some defaults
 if (!settings.get('tags')) {
     settings.set('tags', {
@@ -55,13 +139,19 @@ if (!settings.get('tags')) {
         'example tag': '#FF3399'
     });
 }
+if (typeof settings.get('encrypted') != 'boolean') {
+    settings.set('encrypted', false);
+}
 
 let updated = settings.get('version') != app.getVersion();
 settings.set('version', app.getVersion());
 
 var currently_checking = [];
 
+var mainWindowCreated = false;
+
 function createWindow () {
+
     win = new BrowserWindow({
         webPreferences: {
             nodeIntegration: true,
@@ -75,11 +165,18 @@ function createWindow () {
     win.loadFile(__dirname + '/html/index.html');
     win.webContents.on('before-input-event', (event, input) => beforeWindowInputHandler(win, event, input));
 
+    mainWindowCreated = true;
 }
 
-app.whenReady().then(createWindow)
+app.whenReady().then(async () => {
+    await openDB();
+    createWindow();
+})
 
 app.on('window-all-closed', () => {
+    if (!mainWindowCreated) {
+        return;
+    }
     if (process.platform !== 'darwin') {
         app.quit();
     }
