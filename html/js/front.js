@@ -11,6 +11,7 @@ ipcRenderer.invoke("app:version").then(v => {
 
 let account_cache = {};
 let tags_cache = {};
+let encrypted = false;
 
 /**
  * Get correct image name for given rank
@@ -690,17 +691,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let settingsModal_div = document.querySelector('#settingsModal');
   let settingsModal = new bootstrap.Modal(settingsModal_div);
+  let setup_encryption_div = settingsModal_div.querySelector("#setup-encryption");
 
   settingsModal_div.addEventListener('show.bs.modal', async () => {
     let tag_list = settingsModal_div.querySelector('#tag-list');
     
-    tags_cache = await ipcRenderer.invoke('settings:get', 'tags');
+    [tags_cache, encrypted] = await Promise.all([
+      ipcRenderer.invoke('settings:get', 'tags'),
+      ipcRenderer.invoke('settings:get', 'encrypted')
+    ]);
     
     while (tag_list.firstChild) {
       tag_list.firstChild.remove();
     }
     for (const tag in tags_cache) {
       tag_list.appendChild(createTagEdit(tag, tags_cache[tag]));
+    }
+
+    if (encrypted) {
+      setup_encryption_div.classList.add('encrypted');
+    }
+    else {
+      setup_encryption_div.classList.remove('encrypted');
     }
   })
 
@@ -748,6 +760,28 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelector('#delete-all-btn').addEventListener('click', async e => {
     await ipcRenderer.invoke('accounts:delete_all');
     document.querySelectorAll('#main-table tbody tr').forEach(row => row.remove());
+    updateAccounts();
+  });
+
+  document.querySelector('#setup-encryption .btn-success').addEventListener('click', async e => {
+    encrypted = await ipcRenderer.invoke('encryption:setup');
+    if (encrypted) {
+      showToast('Data encrypted successfully', 'success');
+    }
+    else {
+      showToast('Encryption setup canceled', 'danger');
+    }
+    updateAccounts();
+  });
+
+  document.querySelector('#setup-encryption .btn-danger').addEventListener('click', async e => {
+    encrypted = await ipcRenderer.invoke('encryption:remove');
+    if (!encrypted) {
+      showToast('Data decrypted successfully', 'success');
+    }
+    else {
+      showToast('Decryption setup canceled', 'danger');
+    }
     updateAccounts();
   });
 
