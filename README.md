@@ -13,6 +13,7 @@
 
 ## Additional features:
  - import/export form/to `user:pass` combo file
+ - steam guard mobile authenticator shared secrets supported
  - mass refresh
  - copy password to clipboard
  - copy CS:GO friend code to clipboard
