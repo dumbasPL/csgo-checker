@@ -246,12 +246,16 @@ function execSearch(q, login, account) {
 }
 
 /**
- * Handle sorting
- * @param {Event} e click event
+ * @type {HTMLElement}
  */
-function handleSort(e) {
-  e.preventDefault();
-  let elem = e.target;
+let LastClickedColumn;
+/**
+ * Handle sorting
+ * @param {HTMLElement} elem clicked element
+ * @param {Boolean} increment change sorting direction
+ */
+function handleSort(elem, increment = true) {
+  LastClickedColumn = elem;
 
   while (elem.tagName != 'TH') {
     elem = elem.parentNode;
@@ -264,17 +268,19 @@ function handleSort(e) {
     return;
   }
 
-  let new_sort_dir;
-  switch (cur_sort_dir) {
-    case 'none':
-      new_sort_dir = 'DESC';
-      break;
-    case 'DESC':
-      new_sort_dir = 'ASC';
-      break;
-    default: // same as case 'ASC'
-      new_sort_dir = 'none';
-      break;
+  let new_sort_dir = cur_sort_dir;
+  if (increment) {
+    switch (cur_sort_dir) {
+      case 'none':
+        new_sort_dir = 'DESC';
+        break;
+      case 'DESC':
+        new_sort_dir = 'ASC';
+        break;
+      default: // same as case 'ASC'
+        new_sort_dir = 'none';
+        break;
+    }
   }
 
   let new_order;
@@ -295,6 +301,18 @@ function handleSort(e) {
     if (col_name == 'ban') {
       accounts = accounts.map(a => {
         a[1].ban = a[1].error ?? formatPenalty(a[1].penalty_reason ?? '?', a[1].penalty_seconds ?? -1);
+        return a;
+      });
+    }
+    if (col_name == 'rank' || col_name == 'rank_dz' || col_name == 'rank_wg') {
+      accounts = accounts.map(a => {
+        a[1][col_name] = Math.max(a[1][col_name], 0); //clap -1 to 0 so sorting works correctly
+        return a;
+      });
+    }
+    if (col_name == 'prime') {
+      accounts = accounts.map(a => {
+        a[1].prime = a[1].prime ? 1 : 0; //convert to integer
         return a;
       });
     }
@@ -363,9 +381,10 @@ function FindOrCreateRow(login, createCallback) {
  * @param {String} login account login
  * @param {*} account account data
  * @param {Boolean} force force update
+ * @returns {Boolean} account data changed
  */
 function updateRow(row, login, account, force) {
-
+  let changed = false;
   if (!equal(account_cache[login], account) || force) {
     account_cache[login] = account;
 
@@ -415,12 +434,28 @@ function updateRow(row, login, account, force) {
     row.querySelector('.copy-code').style.display = dis;
     row.querySelector('.open-pofile').style.display = dis;
 
+    changed = true;
   }
 
   if (account.penalty_seconds > 0) {
     row.querySelector('.ban').innerText = account.error ?? formatPenalty(account.penalty_reason ?? '?', account.penalty_seconds ?? -1)
   }
 
+  return changed;
+}
+
+function performSearch() {
+  let q = document.querySelector('#search').value;
+
+  for (const login in account_cache) {
+    const account = account_cache[login];
+    let matches = execSearch(q, login, account);
+
+    let row = document.getElementById('acc-' + login)
+    if (row) {
+      row.style.display = matches ? '' : 'none';
+    }
+  }
 }
 
 var update_cycle = -1;
@@ -432,6 +467,7 @@ async function updateAccounts(force = false) {
   clearTimeout(update_cycle);
   tags_cache = await ipcRenderer.invoke('settings:get', 'tags');
   const accounts = await ipcRenderer.invoke('accounts:get');
+  let changed = false;
   for (const login in accounts) {
     let row = FindOrCreateRow(login, tr => {
       tr.querySelector('.copy-code').addEventListener('click', e => {
@@ -480,8 +516,13 @@ async function updateAccounts(force = false) {
       });
     });
 
-    updateRow(row, login, accounts[login], force);
-
+    changed |= updateRow(row, login, accounts[login], force);
+  }
+  if (changed) {
+    performSearch();
+    if (LastClickedColumn) {
+      handleSort(LastClickedColumn, false);
+    }
   }
   update_cycle = setTimeout(updateAccounts, 500);
 }
@@ -740,22 +781,12 @@ document.addEventListener('DOMContentLoaded', () => {
     settingsModal.show();
   });
 
-  document.querySelector('#search').addEventListener('input', e => {
-    let q = e.target.value;
+  document.querySelector('#search').addEventListener('input', () => performSearch());
 
-    for (const login in account_cache) {
-      const account = account_cache[login];
-      let matches = execSearch(q, login, account);
-
-      let row = document.getElementById('acc-' + login)
-      if (row) {
-        row.style.display = matches ? '' : 'none';
-      }
-    }
-
-  });
-
-  document.querySelectorAll('#main-table th.sortable').forEach(e => e.addEventListener('click', handleSort));
+  document.querySelectorAll('#main-table th.sortable').forEach(e => e.addEventListener('click', e => {
+    e.preventDefault();
+    handleSort(e.target);
+  }));
 
   document.querySelector('#delete-all-btn').addEventListener('click', async e => {
     await ipcRenderer.invoke('accounts:delete_all');
