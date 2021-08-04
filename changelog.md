@@ -1,3 +1,6 @@
+# 1.1.1
+  - fixed sorting algorithm causing changes to account data
+
 # 1.1.0
   - added support for shared secrets ([#5](https://github.com/dumbasPL/csgo-checker/issues/5))
   - added new cooldown reason `Reports (Grief)`

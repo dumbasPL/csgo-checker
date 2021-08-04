@@ -300,20 +300,23 @@ function handleSort(elem, increment = true) {
     //combine bans and errors
     if (col_name == 'ban') {
       accounts = accounts.map(a => {
-        a[1].ban = a[1].error ?? formatPenalty(a[1].penalty_reason ?? '?', a[1].penalty_seconds ?? -1);
-        return a;
+        let clone = Object.assign({}, a[1]);
+        clone.ban = clone.error ?? formatPenalty(clone.penalty_reason ?? '?', clone.penalty_seconds ?? -1);
+        return [a[0], clone];
       });
     }
     if (col_name == 'rank' || col_name == 'rank_dz' || col_name == 'rank_wg') {
       accounts = accounts.map(a => {
-        a[1][col_name] = Math.max(a[1][col_name], 0); //clap -1 to 0 so sorting works correctly
-        return a;
+        let clone = Object.assign({}, a[1]);
+        clone[col_name] = Math.max(clone[col_name], 0); //clap -1 to 0 so sorting works correctly
+        return [a[0], clone];
       });
     }
     if (col_name == 'prime') {
       accounts = accounts.map(a => {
-        a[1].prime = a[1].prime ? 1 : 0; //convert to integer
-        return a;
+        let clone = Object.assign({}, a[1]);
+        clone.prime = clone.prime ? 1 : 0; //convert to integer
+        return [a[0], clone];
       });
     }
     if (new_sort_dir != 'none') {
