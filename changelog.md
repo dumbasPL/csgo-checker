@@ -1,3 +1,6 @@
+# 1.1.2
+  - fixed auto updater
+
 # 1.1.1
   - fixed sorting algorithm causing changes to account data
 
