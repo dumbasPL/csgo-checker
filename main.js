@@ -164,6 +164,21 @@ function createWindow () {
     win.removeMenu();
     win.loadFile(__dirname + '/html/index.html');
     win.webContents.on('before-input-event', (event, input) => beforeWindowInputHandler(win, event, input));
+    win.webContents.once('did-finish-load', () => {
+        console.log("ok");
+        if (!isDev) {
+            autoUpdater.on('update-available', (info) => {
+                win.webContents.send('update:available');
+            })
+            autoUpdater.on('update-downloaded', (info) => {
+                win.webContents.send('update:downloaded');
+            });
+            autoUpdater.on('error', (err) => {
+                console.log(err);
+            })
+            autoUpdater.checkForUpdatesAndNotify();
+        }
+    })
 
     mainWindowCreated = true;
 }
@@ -187,21 +202,6 @@ app.on('activate', () => {
         createWindow();
     }
 })
-
-app.on('ready', function()  {
-    if (!isDev) {
-        autoUpdater.on('update-available', (info) => {
-            win.webContents.send('update:available');
-        })
-        autoUpdater.on('update-downloaded', (info) => {
-            win.webContents.send('update:downloaded');
-        });
-        autoUpdater.on('error', (err) => {
-            console.log(err);
-        })
-        autoUpdater.checkForUpdatesAndNotify();
-    }
-});
 
 ipcMain.on('encryption:password', (_, password) => passwordPromptResponse = password);
 
