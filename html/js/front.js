@@ -342,9 +342,6 @@ function handleSort(elem, increment = true) {
     tbody.insertBefore(node, null);
   })
 
-  console.log(new_order);
-
-
 }
 
 /**
@@ -712,8 +709,11 @@ document.addEventListener('DOMContentLoaded', () => {
     await ipcRenderer.invoke('accounts:export');
   });
 
-  ipcRenderer.on('update:available', _ => {
-    showToast('Update available, downloading...', 'success');
+  ipcRenderer.on('update:available', (_, autoDownload, updateUrl) => {
+    if (autoDownload) {
+      return showToast('New update available, downloading...', 'success');
+    }
+    return showToast(`New update available, <br>you can <a href="${updateUrl}" class="text-white" target="_blank" onclick="shell.openExternal(this.href); return false;">download it here</a>`, 'success', true); 
   })
   ipcRenderer.on('update:downloaded', _ => {
     showToast('Update downloaded, restart the program to update', 'success');
