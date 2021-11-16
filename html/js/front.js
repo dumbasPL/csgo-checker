@@ -1,8 +1,5 @@
-const equal = require('fast-deep-equal');
-const { ipcRenderer, clipboard, shell } = require('electron');
-const friendCode = require("csgo-friendcode");
-var showdown  = require('showdown');
-const md_converter = new showdown.Converter();
+const { equal } = fastEqual;
+
 let version;
 ipcRenderer.invoke("app:version").then(v => {
   version = v; 

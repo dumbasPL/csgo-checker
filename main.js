@@ -65,7 +65,8 @@ async function openDB() {
                     passwordPromptResponse = null;
                     let promptWindow = new BrowserWindow({
                         webPreferences: {
-                            nodeIntegration: true,
+                            preload: path.join(__dirname, 'preload.js'),
+                            contextIsolation: true,
                         },
                         width: 500,
                         height: 280,
@@ -154,7 +155,8 @@ function createWindow () {
 
     win = new BrowserWindow({
         webPreferences: {
-            nodeIntegration: true,
+            preload: path.join(__dirname, 'preload.js'),
+            contextIsolation: true,
         },
         width: 1100,
         height: 650,

@@ -1,3 +1,6 @@
+# 1.2.0
+  - updated to electron 16
+  - updated dependencies
 # 1.1.2
   - fixed auto updater
 
