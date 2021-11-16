@@ -158,12 +158,11 @@ function createBadge(text, color) {
  * show a toast message
  * @param {String} text text to show
  * @param {String} color bs color
+ * @param {Boolean} permanent is the toast permanent
  */
-function showToast(text, color) {
+function showToast(text, color, permanent = false) {
   let newToast = document.querySelector('#toast-template').content.cloneNode(true);
-  let body = newToast.querySelector('.toast-body');
-  body.innerText = text;
-  body.classList.add('bg-' + color);
+  newToast.querySelector('.toast-body').innerHTML = text;
   let fg = 'white';
   switch(color) {
     case 'warning':
@@ -175,8 +174,12 @@ function showToast(text, color) {
       fg = 'dark';
       break;
   }
-  body.classList.add('text-' + fg);
   let toast_div = newToast.querySelector('.toast');
+  toast_div.classList.add('text-' + fg);
+  toast_div.classList.add('bg-' + color);
+  if (!permanent) {
+    toast_div.querySelector('button.btn-close').remove();
+  }
 
   document.querySelector('.toast-container').appendChild(newToast);
   
@@ -184,7 +187,8 @@ function showToast(text, color) {
     toast_div.remove();
   })
   let toast = new bootstrap.Toast(toast_div, {
-    delay: 2000
+    delay: 2000,
+    autohide: !permanent,
   });
   toast.show();
 }
