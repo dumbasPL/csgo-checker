@@ -1,0 +1,4 @@
+owner: dumbasPL
+repo: csgo-checker
+provider: github
+updaterCacheDirName: csgo-checker-updater
