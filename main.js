@@ -7,6 +7,7 @@ const got = require('got');
 const User = require('steam-user');
 const SteamTotp = require('steam-totp');
 const fs = require('fs');
+const path = require('path');
 const { EOL } = require('os');
 const { penalty_reason_string, protoDecode, protoEncode, penalty_reason_permanent } = require('./helpers/util.js');
 const Protos = require('./helpers/protos.js')([{
@@ -17,8 +18,15 @@ const Protos = require('./helpers/protos.js')([{
         __dirname + '/protos/base_gcmessages.proto',
     ]
 }]);
-if(!fs.existsSync(app.getPath('userData'))){
-    fs.mkdirSync(app.getPath('userData')) //makes data on first run
+
+const IS_PORTABLE = process.env.PORTABLE_EXECUTABLE_DIR != null;
+const USER_DATA = IS_PORTABLE ? path.join(process.env.PORTABLE_EXECUTABLE_DIR, process.env.PORTABLE_EXECUTABLE_APP_FILENAME + '-data') : app.getPath('userData');
+const SETTINGS_PATH = path.join(USER_DATA, 'settings.json');
+const ACCOUNTS_PATH = path.join(USER_DATA, 'accounts.json');
+const ACCOUNTS_ENCRYPTED_PATH = path.join(USER_DATA, 'accounts.encrypted.json');
+
+if(!fs.existsSync(USER_DATA)){
+    fs.mkdirSync(USER_DATA) //makes data on first run
 }
 
 if (isDev) {
@@ -33,7 +41,7 @@ let win = null
 
 let passwordPromptResponse = null;
 
-const settings = new JSONdb(app.getPath('userData') + '/settings.json');
+const settings = new JSONdb(SETTINGS_PATH);
 settings.sync(); //makes empty file on first run
 
 //will be initialized later
@@ -93,7 +101,7 @@ async function openDB() {
                     }
                     db = await new Promise((res, rej) => {
                         try {
-                            let db = new EncryptedStorage(app.getPath('userData') + '/accounts.encrypted.json', pass);
+                            let db = new EncryptedStorage(ACCOUNTS_ENCRYPTED_PATH, pass);
                             db.on('error', rej);//this is for async errors
                             db.on('loaded', () => res(db));
                         } catch (error) {
@@ -119,7 +127,7 @@ async function openDB() {
             }
             return;
         }
-        db = new JSONdb(app.getPath('userData') + '/accounts.json');
+        db = new JSONdb(ACCOUNTS_PATH);
         db.sync();
     } catch (error) {
         await dialog.showMessageBox(null, {
@@ -167,20 +175,26 @@ function createWindow () {
     win.loadFile(__dirname + '/html/index.html');
     win.webContents.on('before-input-event', (event, input) => beforeWindowInputHandler(win, event, input));
     win.webContents.once('did-finish-load', () => {
-        console.log("ok");
-        if (!isDev) {
-            autoUpdater.on('update-available', (info) => {
-                win.webContents.send('update:available');
-            })
-            autoUpdater.on('update-downloaded', (info) => {
-                win.webContents.send('update:downloaded');
-            });
-            autoUpdater.on('error', (err) => {
-                console.log(err);
-            })
+        // disable automatic downloads in portable mode
+        autoUpdater.autoDownload = !IS_PORTABLE && !isDev;
+        autoUpdater.on('update-available', (info) => {
+            const { provider } = autoUpdater.updateInfoAndProvider;
+            const updateUrl = provider.baseUrl + provider.options.owner + '/' + provider.options.repo + '/releases/latest';
+            win.webContents.send('update:available', autoUpdater.autoDownload, updateUrl);
+        });
+        autoUpdater.on('update-downloaded', (info) => {
+            win.webContents.send('update:downloaded');
+        });
+        autoUpdater.on('error', (err) => {
+            console.log(err);
+        });
+        if (autoUpdater.autoDownload) {
             autoUpdater.checkForUpdatesAndNotify();
         }
-    })
+        else {
+            autoUpdater.checkForUpdates();
+        }
+    });
 
     mainWindowCreated = true;
 }
@@ -214,7 +228,8 @@ ipcMain.handle('encryption:setup', async () => {
             parent: win,
             modal: true,
             webPreferences: {
-                nodeIntegration: true,
+                preload: path.join(__dirname, 'preload.js'),
+                contextIsolation: true,
             },
             width: 500,
             height: 375,
@@ -239,7 +254,7 @@ ipcMain.handle('encryption:setup', async () => {
     try {
         db = await new Promise((res, rej) => {
             try {
-                let new_db = new EncryptedStorage(app.getPath('userData') + '/accounts.encrypted.json', pass, {
+                let new_db = new EncryptedStorage(ACCOUNTS_ENCRYPTED_PATH, pass, {
                     newData: db.JSON()
                 });
                 new_db.on('error', rej);//this is for async errors
@@ -249,7 +264,7 @@ ipcMain.handle('encryption:setup', async () => {
             }
         });
         //delete plain text file
-        fs.unlinkSync(app.getPath('userData') + '/accounts.json');
+        fs.unlinkSync(ACCOUNTS_PATH);
         settings.set('encrypted', true);
         return true;
     } catch (error) {
@@ -267,7 +282,8 @@ ipcMain.handle('encryption:remove', async () => {
                 parent: win,
                 modal: true,
                 webPreferences: {
-                    nodeIntegration: true,
+                    preload: path.join(__dirname, 'preload.js'),
+                    contextIsolation: true,
                 },
                 width: 500,
                 height: 280,
@@ -298,21 +314,21 @@ ipcMain.handle('encryption:remove', async () => {
             //attempt to decrypt using this password
             let temp_db = await new Promise((res, rej) => {
                 try {
-                    let new_db = new EncryptedStorage(app.getPath('userData') + '/accounts.encrypted.json', pass);
+                    let new_db = new EncryptedStorage(ACCOUNTS_ENCRYPTED_PATH, pass);
                     new_db.on('error', rej);//this is for async errors
                     new_db.on('loaded', () => res(new_db));
                 } catch (error) {
                     rej(error);
                 }
             });
-            db = new JSONdb(app.getPath('userData') + '/accounts.json');
+            db = new JSONdb(ACCOUNTS_PATH);
             db.JSON(temp_db.JSON());
             db.sync();
 
             temp_db = null;
 
             //delete encrypted file
-            fs.unlinkSync(app.getPath('userData') + '/accounts.encrypted.json');
+            fs.unlinkSync(ACCOUNTS_ENCRYPTED_PATH);
             settings.set('encrypted', false);
             return false; //false is success as in non encrypted
         } catch (error) {
@@ -468,7 +484,6 @@ function check_account(username, pass, sharedSecret) {
         });
 
         steamClient.on('error', (e) => {
-            // console.log(e);
             let errorStr = ``;
             switch(e.eresult) {
                 case 5:  errorStr = `Invalid Password`;         break;
@@ -602,7 +617,6 @@ function check_account(username, pass, sharedSecret) {
                         if(!Done) {
                             Done = true;
                             currently_checking = currently_checking.filter(x => x !== username);
-                            // console.log(util.inspect(msg, false, null));
                             data.penalty_reason = steamClient.limitations.communityBanned ? 'Community ban' : msg.penalty_reason > 0 ? penalty_reason_string(msg.penalty_reason) : msg.vac_banned ? 'VAC' : 0;
                             data.penalty_seconds = msg.vac_banned || steamClient.limitations.communityBanned || penalty_reason_permanent(msg.penalty_reason) ? -1 : msg.penalty_seconds > 0 ? (Math.floor(Date.now() / 1000) + msg.penalty_seconds) : 0;
                             data.wins = msg.vac_banned ? -1 : attempts < 5 ? msg.ranking.wins : 0;

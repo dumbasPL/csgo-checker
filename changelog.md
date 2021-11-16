@@ -1,6 +1,8 @@
 # 1.2.0
   - updated to electron 16
   - updated dependencies
+  - added portable version
+
 # 1.1.2
   - fixed auto updater
 

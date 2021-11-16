@@ -34,8 +34,12 @@
     "win": {
       "artifactName": "CSGO Checker installer.${ext}",
       "target": [
-        "nsis"
+        "nsis",
+        "portable"
       ]
+    },
+    "portable": {
+      "artifactName": "csgo-checker_portable.exe"
     },
     "publish": [
       {
