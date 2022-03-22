@@ -25,7 +25,7 @@
     "steam-user": "^4.20.2"
   },
   "devDependencies": {
-    "electron": "^16.0.0",
+    "electron": "^16.0.6",
     "electron-builder": "^22.13.1"
   },
   "build": {
