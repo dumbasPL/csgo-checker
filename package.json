@@ -25,6 +25,7 @@
     "showdown": "^2.0.3",
     "simple-json-db": "^2.0.0",
     "steam-totp": "^2.1.2",
+    "steam-user": "^4.24.3",
     "tailwindcss": "^3",
     "vue": "^3.2.13"
   },
