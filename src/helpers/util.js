@@ -1,11 +1,4 @@
-module.exports = {
-  penalty_reason_string,
-  penalty_reason_permanent,
-  protoDecode,
-  protoEncode
-}
-
-function penalty_reason_string(id) {
+export function penalty_reason_string(id) {
   switch (id)
   {
   case 0: return 0;
@@ -31,7 +24,7 @@ function penalty_reason_string(id) {
   }
 }
 
-function penalty_reason_permanent(id) {
+export function penalty_reason_permanent(id) {
   switch (id)
   {
   case 8: 
@@ -43,10 +36,14 @@ function penalty_reason_permanent(id) {
   }
 }
 
-function protoDecode(proto, obj) {
+export function protoDecode(proto, obj) {
   return proto.toObject(proto.decode(obj), { defaults: true });
 }
 
-function protoEncode(proto, obj) {
+export function protoEncode(proto, obj) {
   return proto.encode(proto.create(obj)).finish();
+}
+
+export function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
