@@ -4,10 +4,10 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import './assets/tailwind.css';
-
 export default {
   name: 'App',
 };
+import 'material-design-icons/iconfont/material-icons.css';
 </script>
