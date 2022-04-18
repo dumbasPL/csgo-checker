@@ -9,6 +9,7 @@ const SteamTotp = require('steam-totp');
 const fs = require('fs');
 const path = require('path');
 const { EOL } = require('os');
+const child_process = require('child_process');
 const { penalty_reason_string, protoDecode, protoEncode, penalty_reason_permanent } = require('./helpers/util.js');
 const Protos = require('./helpers/protos.js')([{
     name: 'csgo',
@@ -351,6 +352,19 @@ ipcMain.handle('encryption:remove', async () => {
 
 ipcMain.handle('app:version', app.getVersion);
 
+ipcMain.handle('accounts:otp', (_, secret) => {
+    return SteamTotp.generateAuthCode(secret);
+});
+
+ipcMain.handle('accounts:change', (_, login) => {
+    child_process.exec('taskkill /f /im steam.exe', () => {
+        console.log(`REG ADD "HKCU\\\\Software\\\\Valve\\\\Steam" /f /v "AutoLoginUser" /t REG_SZ /d "${login}"`);
+        child_process.exec(`REG ADD "HKCU\\Software\\Valve\\Steam" /f /v "AutoLoginUser" /t REG_SZ /d "${login}"`, () => {
+            child_process.exec(`start steam://open/main`);
+        });
+    });
+});
+
 ipcMain.handle('accounts:get', () => {
     let data = db.JSON();
     for (const username in data) {
@@ -372,7 +386,6 @@ async function process_check_account(username) {
 
     try {
         const res = await check_account(username, account.password, account.sharedSecret);
-        console.log(res);
         for (const key in res) {
             if (Object.hasOwnProperty.call(res, key)) {
                 account[key] = res[key];
@@ -436,9 +449,9 @@ ipcMain.handle('accounts:export', async (event) => {
                 name: 'Text files',
                 extensions: ['txt']
             },
-            { 
-                name: 'All Files', 
-                extensions: ['*'] 
+            {
+                name: 'All Files',
+                extensions: ['*']
             }
         ]
     });
@@ -580,16 +593,16 @@ function check_account(username, pass, sharedSecret) {
                                 continue;
                             }
                             switch (cache_object.type_id) {
-                            case 7: {
-                                let CSOEconGameAccountClient = protoDecode(Protos.csgo.CSOEconGameAccountClient, cache_object.object_data[0]);
-                                if ((CSOEconGameAccountClient.bonus_xp_usedflags & 16) != 0) { // EXPBonusFlag::PrestigeEarned
-                                    data.prime = true;
+                                case 7: {
+                                    let CSOEconGameAccountClient = protoDecode(Protos.csgo.CSOEconGameAccountClient, cache_object.object_data[0]);
+                                    if ((CSOEconGameAccountClient.bonus_xp_usedflags & 16) != 0) { // EXPBonusFlag::PrestigeEarned
+                                        data.prime = true;
+                                    }
+                                    if (CSOEconGameAccountClient.elevated_state == 5) { // bought prime
+                                        data.prime = true;
+                                    }
+                                    break;
                                 }
-                                if (CSOEconGameAccountClient.elevated_state == 5) { // bought prime
-                                    data.prime = true;
-                                }
-                                break;
-                            }
                             }
                         }
                     }
@@ -617,8 +630,8 @@ function check_account(username, pass, sharedSecret) {
                         if(!Done) {
                             Done = true;
                             currently_checking = currently_checking.filter(x => x !== username);
-                            data.penalty_reason = steamClient.limitations.communityBanned ? 'Community ban' : msg.penalty_reason > 0 ? penalty_reason_string(msg.penalty_reason) : msg.vac_banned ? 'VAC' : 0;
-                            data.penalty_seconds = msg.vac_banned || steamClient.limitations.communityBanned || penalty_reason_permanent(msg.penalty_reason) ? -1 : msg.penalty_seconds > 0 ? (Math.floor(Date.now() / 1000) + msg.penalty_seconds) : 0;
+                            data.penalty_reason = (steamClient.limitations.communityBanned ? 'Community ban' : '') + (msg.penalty_reason > 0 && steamClient.limitations.communityBanned ? ' - ': '') + (msg.penalty_reason > 0 ? penalty_reason_string(msg.penalty_reason) : msg.vac_banned ? 'VAC' : 0);
+                            data.penalty_seconds = msg.vac_banned || penalty_reason_permanent(msg.penalty_reason) ? -1 : msg.penalty_seconds > 0 ? (Math.floor(Date.now() / 1000) + msg.penalty_seconds) : 0;
                             data.wins = msg.vac_banned ? -1 : attempts < 5 ? msg.ranking.wins : 0;
                             data.rank = msg.vac_banned ? -1 : attempts < 5 ? msg.ranking.rank_id : 0;
                             data.name = steamClient.accountInfo.name;
@@ -666,5 +679,5 @@ function check_account(username, pass, sharedSecret) {
                 }
             }
         });
-    });    
+    });
 }
