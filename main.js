@@ -630,8 +630,8 @@ function check_account(username, pass, sharedSecret) {
                         if(!Done) {
                             Done = true;
                             currently_checking = currently_checking.filter(x => x !== username);
-                            data.penalty_reason = (steamClient.limitations.communityBanned ? 'Community ban' : '') + (msg.penalty_reason > 0 && steamClient.limitations.communityBanned ? ' - ': '') + (msg.penalty_reason > 0 ? penalty_reason_string(msg.penalty_reason) : msg.vac_banned ? 'VAC' : 0);
-                            data.penalty_seconds = msg.vac_banned || penalty_reason_permanent(msg.penalty_reason) ? -1 : msg.penalty_seconds > 0 ? (Math.floor(Date.now() / 1000) + msg.penalty_seconds) : 0;
+                            data.penalty_reason = (steamClient.limitations.communityBanned ? 'Community ban' : '') + (msg.penalty_reason > 0 && steamClient.limitations.communityBanned ? ' - ': '') + (msg.penalty_reason > 0 ? penalty_reason_string(msg.penalty_reason) : msg.vac_banned ? 'VAC' : '');
+                            data.penalty_seconds = msg.vac_banned || !msg.penalty_reason ? -1 : penalty_reason_permanent(msg.penalty_reason) ? -1 : msg.penalty_seconds > 0 ? (Math.floor(Date.now() / 1000) + msg.penalty_seconds) : 0;
                             data.wins = msg.vac_banned ? -1 : attempts < 5 ? msg.ranking.wins : 0;
                             data.rank = msg.vac_banned ? -1 : attempts < 5 ? msg.ranking.rank_id : 0;
                             data.name = steamClient.accountInfo.name;
