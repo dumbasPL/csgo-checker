@@ -32,7 +32,7 @@
 </template>
 
 <script setup>
-import TopBarMenuButton from './TopBarMenuButton.vue';
-import SettingsModal from './SettingsModal.vue';
+import TopBarMenuButton from './buttons/TopBarMenuButton.vue';
+import SettingsModal from './modals/SettingsModal.vue';
 
 </script>

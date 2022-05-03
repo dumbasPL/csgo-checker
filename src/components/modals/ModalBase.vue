@@ -14,7 +14,7 @@
             </div>
             <div class="py-3 px-4 flex items-center justify-end">
               <slot name="footer">
-                <ButtonSave></ButtonSave>
+                <SaveButton></SaveButton>
               </slot>
             </div>
           </div>
@@ -26,7 +26,7 @@
 
 <script setup>
 import { ref } from 'vue';
-import ButtonSave from './ButtonSave.vue';
+import SaveButton from '../buttons/SaveButton.vue';
 
 const shown = ref(false);
 

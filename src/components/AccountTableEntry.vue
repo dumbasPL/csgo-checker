@@ -38,7 +38,7 @@
 import { ref } from 'vue';
 import PrimeIcon from './icons/PrimeIcon.vue';
 import RankIcon from './icons/RankIcon.vue';
-import AccountActionButton from './AccountActionButton.vue';
+import AccountActionButton from './buttons/AccountActionButton.vue';
 
 const props = defineProps({
   username: String,
