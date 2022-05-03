@@ -1,18 +1,18 @@
 <template>
   <Teleport to="#modals" :disabled="!shown">
     <Transition name="modal">
-      <div v-if="shown" class="fixed inset-0 flex items-center justify-center bg-black/50 bg-blend-darken" @click="hide">
+      <div v-if="shown" class="fixed inset-0 flex items-center justify-center bg-black/70 bg-blend-darken" @click="hide">
         <div class="absolute w-3/4 h-5/6 modal">
       
           <div class="w-full max-h-full opacity-100 bg-slate-700 text-white rounded-lg shadow-2xl shadow-slate-900/40" @click.stop>
-            <div class="py-3 px-4 border-b border-slate-500 flex items-center justify-between text-lg">
+            <div class="py-3 px-4 flex items-center justify-between text-lg">
               <span class="truncate"><slot name="header"></slot></span>
               <button class="material-icons" @click="hide">close</button>
             </div>
             <div class="p-3">
               <slot></slot>
             </div>
-            <div class="border-t border-slate-500 py-3 px-4 flex items-center justify-end">
+            <div class="py-3 px-4 flex items-center justify-end">
               <slot name="footer">
                 <ButtonSave></ButtonSave>
               </slot>
