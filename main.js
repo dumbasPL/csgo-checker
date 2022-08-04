@@ -452,6 +452,9 @@ ipcMain.handle('accounts:export', async (event) => {
 ipcMain.handle("settings:get", (_, type) => settings.get(type));
 
 ipcMain.handle("settings:set", (_, type, value) => settings.set(type, value));
+ipcMain.handle("get:sgcode", (_, sharedSecret) => {
+    return SteamTotp.generateAuthCode(sharedSecret);
+})
 
 /**
  * Logs on to specified account and performs all checks
