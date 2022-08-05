@@ -25,7 +25,7 @@ const SETTINGS_PATH = path.join(USER_DATA, 'settings.json');
 const ACCOUNTS_PATH = path.join(USER_DATA, 'accounts.json');
 const ACCOUNTS_ENCRYPTED_PATH = path.join(USER_DATA, 'accounts.encrypted.json');
 
-if(!fs.existsSync(USER_DATA)){
+if (!fs.existsSync(USER_DATA)) {
     fs.mkdirSync(USER_DATA) //makes data on first run
 }
 
@@ -159,7 +159,7 @@ var currently_checking = [];
 
 var mainWindowCreated = false;
 
-function createWindow () {
+function createWindow() {
 
     win = new BrowserWindow({
         webPreferences: {
@@ -356,7 +356,7 @@ ipcMain.handle('accounts:get', () => {
     for (const username in data) {
         if (Object.hasOwnProperty.call(data, username)) {
             const account = data[username];
-            if(currently_checking.indexOf(username) != -1){
+            if (currently_checking.indexOf(username) != -1) {
                 account.pending = true;
             }
         }
@@ -366,7 +366,7 @@ ipcMain.handle('accounts:get', () => {
 
 async function process_check_account(username) {
     const account = db.get(username);
-    if(!account) {
+    if (!account) {
         return { error: 'unable to find account' };
     }
 
@@ -436,9 +436,9 @@ ipcMain.handle('accounts:export', async (event) => {
                 name: 'Text files',
                 extensions: ['txt']
             },
-            { 
-                name: 'All Files', 
-                extensions: ['*'] 
+            {
+                name: 'All Files',
+                extensions: ['*']
             }
         ]
     });
@@ -452,6 +452,17 @@ ipcMain.handle('accounts:export', async (event) => {
 ipcMain.handle("settings:get", (_, type) => settings.get(type));
 
 ipcMain.handle("settings:set", (_, type, value) => settings.set(type, value));
+ipcMain.handle("get:sgcode", (_, sharedSecret) => new Promise((resolve, reject) => {
+    SteamTotp.getTimeOffset((err, offset) => {
+        try {
+            let code = SteamTotp.getAuthCode(sharedSecret, offset)
+            resolve(code)
+        }
+        catch (e) {
+            resolve("")
+        }
+    })
+}))
 
 /**
  * Logs on to specified account and performs all checks
@@ -463,7 +474,7 @@ ipcMain.handle("settings:set", (_, type, value) => settings.set(type, value));
 function check_account(username, pass, sharedSecret) {
     return new Promise((resolve, reject) => {
         sleep = (ms) => {
-            return new Promise(resolve=>{
+            return new Promise(resolve => {
                 setTimeout(resolve, ms);
             });
         }
@@ -485,13 +496,13 @@ function check_account(username, pass, sharedSecret) {
 
         steamClient.on('error', (e) => {
             let errorStr = ``;
-            switch(e.eresult) {
-                case 5:  errorStr = `Invalid Password`;         break;
+            switch (e.eresult) {
+                case 5: errorStr = `Invalid Password`; break;
                 case 6:
-                case 34: errorStr = `Logged In Elsewhere`;      break;
-                case 84: errorStr = `Rate Limit Exceeded`;     break;
-                case 65: errorStr = `steam guard is invalid`;  break;
-                default: errorStr = `Unknown: ${e.eresult}`;    break;
+                case 34: errorStr = `Logged In Elsewhere`; break;
+                case 84: errorStr = `Rate Limit Exceeded`; break;
+                case 65: errorStr = `steam guard is invalid`; break;
+                default: errorStr = `Unknown: ${e.eresult}`; break;
             }
             currently_checking = currently_checking.filter(x => x !== username);
             reject(errorStr);
@@ -528,7 +539,7 @@ function check_account(username, pass, sharedSecret) {
             }
         });
 
-        steamClient.on('webSession', (sessionID, cookies ) => {
+        steamClient.on('webSession', (sessionID, cookies) => {
             sleep(1000).then(() => {
                 got(`https://steamcommunity.com/profiles/${steamClient.steamID.getSteamID64()}/gcpd/730?tab=matchmaking`, {
                     headers: {
@@ -569,7 +580,7 @@ function check_account(username, pass, sharedSecret) {
 
         steamClient.on('receivedFromGC', (appid, msgType, payload) => {
             console.log(`receivedFromGC ${msgType} on account ${username}`);
-            switch(msgType) {
+            switch (msgType) {
                 case 4004: {
                     let CMsgClientWelcome = protoDecode(Protos.csgo.CMsgClientWelcome, payload);
                     for (let i = 0; i < CMsgClientWelcome.outofdate_subscribed_caches.length; i++) {
@@ -580,16 +591,16 @@ function check_account(username, pass, sharedSecret) {
                                 continue;
                             }
                             switch (cache_object.type_id) {
-                            case 7: {
-                                let CSOEconGameAccountClient = protoDecode(Protos.csgo.CSOEconGameAccountClient, cache_object.object_data[0]);
-                                if ((CSOEconGameAccountClient.bonus_xp_usedflags & 16) != 0) { // EXPBonusFlag::PrestigeEarned
-                                    data.prime = true;
+                                case 7: {
+                                    let CSOEconGameAccountClient = protoDecode(Protos.csgo.CSOEconGameAccountClient, cache_object.object_data[0]);
+                                    if ((CSOEconGameAccountClient.bonus_xp_usedflags & 16) != 0) { // EXPBonusFlag::PrestigeEarned
+                                        data.prime = true;
+                                    }
+                                    if (CSOEconGameAccountClient.elevated_state == 5) { // bought prime
+                                        data.prime = true;
+                                    }
+                                    break;
                                 }
-                                if (CSOEconGameAccountClient.elevated_state == 5) { // bought prime
-                                    data.prime = true;
-                                }
-                                break;
-                            }
                             }
                         }
                     }
@@ -601,20 +612,20 @@ function check_account(username, pass, sharedSecret) {
                 case 9110: {
                     {
                         //request wingman and dz rank
-                        let message = protoEncode(Protos.csgo.CMsgGCCStrike15_v2_ClientGCRankUpdate, { rankings: [ { rank_type_id: 7 }, { rank_type_id: 10 } ] });
+                        let message = protoEncode(Protos.csgo.CMsgGCCStrike15_v2_ClientGCRankUpdate, { rankings: [{ rank_type_id: 7 }, { rank_type_id: 10 }] });
                         steamClient.sendToGC(appid, 9194, {}, message);
                     }
 
                     let msg = protoDecode(Protos.csgo.CMsgGCCStrike15_v2_MatchmakingGC2ClientHello, payload);
 
                     ++attempts;
-                    if(msg.ranking === null && attempts < 5 && !msg.vac_banned) {
+                    if (msg.ranking === null && attempts < 5 && !msg.vac_banned) {
                         sleep(2000).then(() => {
                             steamClient.sendToGC(appid, 9109, {}, Buffer.alloc(0));
                         });
                     }
                     else {
-                        if(!Done) {
+                        if (!Done) {
                             Done = true;
                             currently_checking = currently_checking.filter(x => x !== username);
                             data.penalty_reason = steamClient.limitations.communityBanned ? 'Community ban' : msg.penalty_reason > 0 ? penalty_reason_string(msg.penalty_reason) : msg.vac_banned ? 'VAC' : 0;
@@ -625,7 +636,7 @@ function check_account(username, pass, sharedSecret) {
                             data.lvl = msg.player_level;
                             data.steamid = steamClient.steamID.getSteamID64();
                             data.error = null;
-                            if(data.rank_wg != undefined && data.rank_dz != undefined) {
+                            if (data.rank_wg != undefined && data.rank_dz != undefined) {
                                 resolve(data);
                                 steamClient.logOff();
                             }
@@ -636,27 +647,27 @@ function check_account(username, pass, sharedSecret) {
                 case 9194: {
                     let msg = protoDecode(Protos.csgo.CMsgGCCStrike15_v2_ClientGCRankUpdate, payload);
                     for (const ranking of msg.rankings) {
-                        if(ranking.rank_type_id == 7) { //wingman
+                        if (ranking.rank_type_id == 7) { //wingman
                             data.wins_wg = ranking.wins;
                             data.rank_wg = ranking.rank_id;
-                            if(data.wins === -1) { //vac banned
+                            if (data.wins === -1) { //vac banned
                                 data.wins_wg == -1;
                                 data.rank_wg == -1;
                             }
-                            if(data.steamid != undefined && data.rank_dz != undefined) {
+                            if (data.steamid != undefined && data.rank_dz != undefined) {
                                 resolve(data);
                                 steamClient.logOff();
                                 break;
                             }
                         }
-                        if(ranking.rank_type_id == 10) { //dangerzone
+                        if (ranking.rank_type_id == 10) { //dangerzone
                             data.wins_dz = ranking.wins;
                             data.rank_dz = ranking.rank_id;
-                            if(data.wins === -1) { //vac banned
+                            if (data.wins === -1) { //vac banned
                                 data.wins_dz == -1;
                                 data.rank_dz == -1;
                             }
-                            if(data.steamid != undefined && data.rank_wg != undefined) {
+                            if (data.steamid != undefined && data.rank_wg != undefined) {
                                 resolve(data);
                                 steamClient.logOff();
                                 break;
@@ -666,5 +677,5 @@ function check_account(username, pass, sharedSecret) {
                 }
             }
         });
-    });    
+    });
 }

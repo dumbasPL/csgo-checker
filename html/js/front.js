@@ -406,7 +406,7 @@ function updateRow(row, login, account, force) {
         tags.appendChild(badge);
       });
     }
-    row.querySelector('.level').innerText = account.lvl ?? '?';
+    row.querySelector('.level > img').src = `img/ranks/level${account.lvl}.png` ?? '?';
     row.querySelector('.prime img').className = account.steamid ? account.prime ? 'prime-green' : 'prime-red' : '';
   
     row.querySelector('.rank .mm').src = getRankImage(account.rank ?? 0, account.wins ?? 0, 'mm');
@@ -430,7 +430,19 @@ function updateRow(row, login, account, force) {
     bootstrap.Tooltip.getInstance(row.querySelector('.rank .dz'))._fixTitle();
 
     row.querySelector('.ban').innerText = account.error ?? formatPenalty(account.penalty_reason ?? '?', account.penalty_seconds ?? -1)
-
+    let updateSgCode = (shr) => () => {
+      ipcRenderer.invoke("get:sgcode", shr).then(v => {
+        row.querySelector('.sgcode').innerText = v;
+  
+      });
+    }
+    row.querySelector(".sgcode").addEventListener("click", () => {
+      navigator.clipboard.writeText(row.querySelector(".sgcode").innerText)
+    })
+    setInterval(updateSgCode(account.sharedSecret), 2500)
+    updateSgCode(account.sharedSecret)();
+    
+    
     let dis = account.steamid ? 'inline-block' : 'none';
     row.querySelector('.copy-code').style.display = dis;
     row.querySelector('.open-pofile').style.display = dis;
