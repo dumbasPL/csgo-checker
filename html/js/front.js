@@ -406,7 +406,7 @@ function updateRow(row, login, account, force) {
         tags.appendChild(badge);
       });
     }
-    row.querySelector('.level').innerText = account.lvl ?? '?';
+    row.querySelector('.level > img').src = `img/ranks/level${account.lvl}.png` ?? '?';
     row.querySelector('.prime img').className = account.steamid ? account.prime ? 'prime-green' : 'prime-red' : '';
   
     row.querySelector('.rank .mm').src = getRankImage(account.rank ?? 0, account.wins ?? 0, 'mm');
