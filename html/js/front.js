@@ -430,14 +430,17 @@ function updateRow(row, login, account, force) {
     bootstrap.Tooltip.getInstance(row.querySelector('.rank .dz'))._fixTitle();
 
     row.querySelector('.ban').innerText = account.error ?? formatPenalty(account.penalty_reason ?? '?', account.penalty_seconds ?? -1)
-    let updateSgCode = () => {
-      ipcRenderer.invoke("get:sgcode", account.sharedSecret).then(v => {
+    let updateSgCode = (shr) => () => {
+      ipcRenderer.invoke("get:sgcode", shr).then(v => {
         row.querySelector('.sgcode').innerText = v;
   
       });
     }
-    setInterval(() => updateSgCode, 5000)
-    updateSgCode();
+    row.querySelector(".sgcode").addEventListener("click", () => {
+      navigator.clipboard.writeText(row.querySelector(".sgcode").innerText)
+    })
+    setInterval(updateSgCode(account.sharedSecret), 2500)
+    updateSgCode(account.sharedSecret)();
     
     
     let dis = account.steamid ? 'inline-block' : 'none';
