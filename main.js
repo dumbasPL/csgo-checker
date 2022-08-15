@@ -273,6 +273,24 @@ ipcMain.handle('encryption:setup', async () => {
     }
 });
 
+ipcMain.handle('steamtotp', (_, data) => new Promise((rs, rj) =>{
+    SteamTotp.getTimeOffset((err, offset) => {
+        if (!err) {
+            SteamTotp.generateAuthCode(data.secret, offset, (err, code) => {
+                if (!err) {
+                    rs(code);
+                }
+                else {
+                    rj(err);
+                }
+            })
+        }
+        else {
+            rj(err)
+        }
+    })
+}))
+
 ipcMain.handle('encryption:remove', async () => {
     let error_message = null;
     while (true) {

@@ -431,6 +431,7 @@ function updateRow(row, login, account, force) {
 
     row.querySelector('.ban').innerText = account.error ?? formatPenalty(account.penalty_reason ?? '?', account.penalty_seconds ?? -1)
 
+
     let dis = account.steamid ? 'inline-block' : 'none';
     row.querySelector('.copy-code').style.display = dis;
     row.querySelector('.open-pofile').style.display = dis;
@@ -483,6 +484,18 @@ async function updateAccounts(force = false) {
         showToast('Password copied to clipboard', 'success');
       });
 
+      if (account_cache[login].sharedSecret) {
+        tr.querySelector('.copy-steamguard').addEventListener('click', async e => {
+          e.preventDefault();
+          let code = await ipcRenderer.invoke('steamtotp', account_cache[login].sharedSecret);
+          clipboard.writeText(code, 'selection');
+          showToast('SteamGuard Code copied to clipboard', 'success');
+        });
+      }
+      else {
+        tr.querySelector('.copy-steamguard').style.display = 'none';
+      }
+    
       tr.querySelector('.open-pofile').addEventListener('click', e => {
         e.preventDefault();
         shell.openExternal('https://steamcommunity.com/profiles/' + account_cache[login].steamid);
