@@ -274,19 +274,13 @@ ipcMain.handle('encryption:setup', async () => {
 });
 
 ipcMain.handle('steamtotp', (_, data) => new Promise((rs, rj) =>{
-    SteamTotp.getTimeOffset((err, offset) => {
+    SteamTotp.generateAuthCode(data.secret, (err, code) => {
         if (!err) {
-            SteamTotp.generateAuthCode(data.secret, offset, (err, code) => {
-                if (!err) {
-                    rs(code);
-                }
-                else {
-                    rj(err);
-                }
-            })
+            rs(code);
         }
         else {
-            rj(err)
+            console.error("err, " + err)
+            rj(err);
         }
     })
 }))

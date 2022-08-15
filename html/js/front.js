@@ -2,7 +2,7 @@ const { equal } = fastEqual;
 
 let version;
 ipcRenderer.invoke("app:version").then(v => {
-  version = v; 
+  version = v;
   document.title += " " + v;
 });
 
@@ -16,7 +16,7 @@ let encrypted = false;
  * @param {Number} wins number of wins
  * @param {'mm' | 'wg' | 'dz'} type rank type 
  * @returns {String}
- */ 
+ */
 function getRankImage(rank, wins, type) {
   let prefix = 'img/skillgroups/';
   switch (type) {
@@ -38,37 +38,36 @@ function getRankImage(rank, wins, type) {
  * @param {Number} rank ranking
  * @param {Number} wins number of wins
  * @returns {String} rank name
- */ 
+ */
 function getRankName(rank, wins) {
   if (rank <= 0) {
     rank = 0;
   }
-  switch (rank)
-  {
-    case 0:	
-      if(wins >= 10) {
+  switch (rank) {
+    case 0:
+      if (wins >= 10) {
         return "Expired";
       }
       return "Unranked";
-      case 1:	return "Silver 1";
-      case 2:	return "Silver 2";
-      case 3:	return "Silver 3";
-      case 4:	return "Silver 4";
-      case 5:	return "Silver Elite";
-      case 6:	return "Silver Elite Master";
-      case 7:	return "Gold Nova 1";
-      case 8:	return "Gold Nova 2";
-      case 9:	return "Gold Nova 3";
-      case 10: return "Gold Nova Master";
-      case 11: return "Master Guardian 1";
-      case 12: return "Master Guardian 2";
-      case 13: return "Master Guardian Elite";
-      case 14: return "Distinguished Master Guardian";
-      case 15: return "Legendary Eagle";
-      case 16: return "Legendary Eagle Master";
-      case 17: return "Supreme Master First Class";
-      case 18: return "Global Elite CS GO";
-      default: return `Unknown(${rank})`;
+    case 1: return "Silver 1";
+    case 2: return "Silver 2";
+    case 3: return "Silver 3";
+    case 4: return "Silver 4";
+    case 5: return "Silver Elite";
+    case 6: return "Silver Elite Master";
+    case 7: return "Gold Nova 1";
+    case 8: return "Gold Nova 2";
+    case 9: return "Gold Nova 3";
+    case 10: return "Gold Nova Master";
+    case 11: return "Master Guardian 1";
+    case 12: return "Master Guardian 2";
+    case 13: return "Master Guardian Elite";
+    case 14: return "Distinguished Master Guardian";
+    case 15: return "Legendary Eagle";
+    case 16: return "Legendary Eagle Master";
+    case 17: return "Supreme Master First Class";
+    case 18: return "Global Elite CS GO";
+    default: return `Unknown(${rank})`;
   }
 }
 
@@ -79,11 +78,11 @@ function getRankName(rank, wins) {
  */
 function countdown(seconds) {
   const d = Math.floor(seconds / (3600 * 24));
-  seconds  -= d * 3600 * 24;
+  seconds -= d * 3600 * 24;
   const h = Math.floor(seconds / 3600);
-  seconds  -= h * 3600;
+  seconds -= h * 3600;
   const m = Math.floor(seconds / 60);
-  seconds  -= m * 60;
+  seconds -= m * 60;
   const tmp = [];
   (d) && tmp.push(d + 'd');
   (d || h) && tmp.push(h + 'h');
@@ -130,12 +129,12 @@ function formatExpireTime(time) {
  * @param {String} color the background color
  * @returns {'black' | 'white'} text color
  */
- function getContrastYIQ(color){
+function getContrastYIQ(color) {
   color = color.trim().replace('#', '');
-  var r = parseInt(color.substr(0,2),16);
-  var g = parseInt(color.substr(2,2),16);
-  var b = parseInt(color.substr(4,2),16);
-  var yiq = ((r*299)+(g*587)+(b*114))/1000;
+  var r = parseInt(color.substr(0, 2), 16);
+  var g = parseInt(color.substr(2, 2), 16);
+  var b = parseInt(color.substr(4, 2), 16);
+  var yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
   return (yiq >= 128) ? 'black' : 'white';
 }
 
@@ -164,7 +163,7 @@ function showToast(text, color, permanent = false) {
   let newToast = document.querySelector('#toast-template').content.cloneNode(true);
   newToast.querySelector('.toast-body').innerHTML = text;
   let fg = 'white';
-  switch(color) {
+  switch (color) {
     case 'warning':
     case 'info':
     case 'light':
@@ -182,7 +181,7 @@ function showToast(text, color, permanent = false) {
   }
 
   document.querySelector('.toast-container').appendChild(newToast);
-  
+
   toast_div.addEventListener('hidden.bs.toast', () => {
     toast_div.remove();
   })
@@ -218,7 +217,7 @@ function createTagEdit(name, color = '#000000') {
  * @returns {Boolean} matches? 
  */
 function execSearch(q, login, account) {
-  
+
   q = q.trim();
   if (q.length == 0) {
     return true;
@@ -408,29 +407,32 @@ function updateRow(row, login, account, force) {
     }
     row.querySelector('.level').innerText = account.lvl ?? '?';
     row.querySelector('.prime img').className = account.steamid ? account.prime ? 'prime-green' : 'prime-red' : '';
-  
+
     row.querySelector('.rank .mm').src = getRankImage(account.rank ?? 0, account.wins ?? 0, 'mm');
     row.querySelector('.rank .wg').src = getRankImage(account.rank_wg ?? 0, account.wins_wg ?? 0, 'wg');
     row.querySelector('.rank .dz').src = getRankImage(account.rank_dz ?? 0, account.wins_dz, 'dz');
-  
+
     let mm_expire = account.last_game ? '<br>expires ' + formatExpireTime(new Date(account.last_game)) : '';
     let wg_expire = account.last_game_wg ? '<br>expires ' + formatExpireTime(new Date(account.last_game_wg)) : '';
     let dz_expire = account.last_game_dz ? '<br>expires ' + formatExpireTime(new Date(account.last_game_dz)) : '';
 
-    row.querySelector('.rank .mm').title = getRankName(account.rank ?? 0, account.wins ?? 0) + 
+    row.querySelector('.rank .mm').title = getRankName(account.rank ?? 0, account.wins ?? 0) +
       '<br>' + (account.wins < 0 ? '?' : account.wins ?? '?') + ' wins' + mm_expire;
-    row.querySelector('.rank .wg').title = getRankName(account.rank_wg ?? 0, account.wins_wg ?? 0) + 
+    row.querySelector('.rank .wg').title = getRankName(account.rank_wg ?? 0, account.wins_wg ?? 0) +
       '<br>' + (account.wins_wg ?? '?') + ' wins' + wg_expire;
-    row.querySelector('.rank .dz').title = getRankName(account.rank_dz ?? 0, account.wins_dz ?? 0) + 
+    row.querySelector('.rank .dz').title = getRankName(account.rank_dz ?? 0, account.wins_dz ?? 0) +
       '<br>' + (account.wins_dz ?? '?') + ' wins' + dz_expire;
 
-    
+
     bootstrap.Tooltip.getInstance(row.querySelector('.rank .mm'))._fixTitle();
     bootstrap.Tooltip.getInstance(row.querySelector('.rank .wg'))._fixTitle();
     bootstrap.Tooltip.getInstance(row.querySelector('.rank .dz'))._fixTitle();
 
     row.querySelector('.ban').innerText = account.error ?? formatPenalty(account.penalty_reason ?? '?', account.penalty_seconds ?? -1)
 
+    if (!account.sharedSecret) {
+      row.querySelector(".copy-steamguard").style.display = "none"
+    }
 
     let dis = account.steamid ? 'inline-block' : 'none';
     row.querySelector('.copy-code').style.display = dis;
@@ -484,18 +486,18 @@ async function updateAccounts(force = false) {
         showToast('Password copied to clipboard', 'success');
       });
 
-      if (account_cache[login].sharedSecret) {
-        tr.querySelector('.copy-steamguard').addEventListener('click', async e => {
-          e.preventDefault();
-          let code = await ipcRenderer.invoke('steamtotp', account_cache[login].sharedSecret);
+      tr.querySelector('.copy-steamguard').addEventListener('click', async e => {
+        e.preventDefault();
+        try {
+          let code = await ipcRenderer.invoke('steamtotp', { secret: account_cache[login].sharedSecret });
           clipboard.writeText(code, 'selection');
           showToast('SteamGuard Code copied to clipboard', 'success');
-        });
-      }
-      else {
-        tr.querySelector('.copy-steamguard').style.display = 'none';
-      }
-    
+        }
+        catch (e) {
+          showToast("An error occured when getting steam guard code", "warning")
+        }
+
+      });
       tr.querySelector('.open-pofile').addEventListener('click', e => {
         e.preventDefault();
         shell.openExternal('https://steamcommunity.com/profiles/' + account_cache[login].steamid);
@@ -506,14 +508,14 @@ async function updateAccounts(force = false) {
         let promise = ipcRenderer.invoke('accounts:check', login);
         updateAccounts();
         let ret = await promise;
-        if(ret.error) {
+        if (ret.error) {
           showToast(login + ': ' + ret.error, 'danger');
         }
         updateAccounts();
       });
       tr.querySelector('.delete').addEventListener('click', async e => {
         e.preventDefault();
-        if(e.ctrlKey) {
+        if (e.ctrlKey) {
           await ipcRenderer.invoke('accounts:delete', login);
           updateAccounts();
           tr.remove();
@@ -561,7 +563,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let editAccountModal_div = document.querySelector('#editAccountModal');
   let editAccountModal = new bootstrap.Modal(editAccountModal_div);
-  
+
   editAccountModal_div.addEventListener('show.bs.modal', async e => {
     //hide password and shared secret by default
     editAccountModal_div.querySelectorAll('.showHidePassword input').forEach(elem => elem.setAttribute('type', 'password'));
@@ -603,7 +605,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       let login = e.relatedTarget;
       let account = account_cache[login];
-      
+
       title.innerText = 'Edit account';
       username.value = login;
       username.disabled = true;
@@ -653,17 +655,17 @@ document.addEventListener('DOMContentLoaded', () => {
     let secret = editAccountModal_div.querySelector('#user-secret');
     let tags = editAccountModal_div.querySelector('#user-tags');
     let tag_values = [...tags.selectedOptions].map(x => x.value).filter(x => x != '-- no tags --');
- 
+
     if (!username.disabled) { //if login is enabled then we are adding new account
       await ipcRenderer.invoke('accounts:add', username.value, password.value);
       await ipcRenderer.invoke('accounts:update', username.value, {
         tags: tag_values,
-        sharedSecret: secret.value.trim().length > 0 ? secret.value : undefined 
+        sharedSecret: secret.value.trim().length > 0 ? secret.value : undefined
       });
       let ret = ipcRenderer.invoke('accounts:check', username.value);
       updateAccounts();
       ret = await ret;
-      if(ret.error) {
+      if (ret.error) {
         showToast(username.value + ': ' + ret.error, 'danger');
       }
       updateAccounts();
@@ -671,14 +673,14 @@ document.addEventListener('DOMContentLoaded', () => {
       await ipcRenderer.invoke('accounts:update', username.value, {
         password: password.value,
         tags: tag_values,
-        sharedSecret: secret.value.trim().length > 0 ? secret.value : undefined 
+        sharedSecret: secret.value.trim().length > 0 ? secret.value : undefined
       });
       updateAccounts();
     }
     let promise = ipcRenderer.invoke('accounts:check', login);
     updateAccounts();
     let ret = await promise;
-    if(ret.error) {
+    if (ret.error) {
       showToast(login + ': ' + ret.error, 'danger');
     }
     updateAccounts();
@@ -706,7 +708,7 @@ document.addEventListener('DOMContentLoaded', () => {
     code_sent = true;
     steamGuardModal.hide();
   })
-  
+
   ipcRenderer.on('steam:steamguard', (_, username) => {
     steamGuardModal_div.querySelector('#steam-guard-username').innerText = username;
     steamGuardModal.show();
@@ -726,7 +728,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (autoDownload) {
       return showToast('New update available, downloading...', 'success');
     }
-    return showToast(`New update available, <br>you can <a href="${updateUrl}" class="text-white" target="_blank" onclick="shell.openExternal(this.href); return false;">download it here</a>`, 'success', true); 
+    return showToast(`New update available, <br>you can <a href="${updateUrl}" class="text-white" target="_blank" onclick="shell.openExternal(this.href); return false;">download it here</a>`, 'success', true);
   })
   ipcRenderer.on('update:downloaded', _ => {
     showToast('Update downloaded, restart the program to update', 'success');
@@ -738,7 +740,7 @@ document.addEventListener('DOMContentLoaded', () => {
     for (const login in accounts) {
       if (Object.hasOwnProperty.call(accounts, login)) {
         ipcRenderer.invoke('accounts:check', login).then(ret => {
-          if(ret.error) {
+          if (ret.error) {
             showToast(login + ': ' + ret.error, 'danger');
           }
         });
@@ -754,12 +756,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   settingsModal_div.addEventListener('show.bs.modal', async () => {
     let tag_list = settingsModal_div.querySelector('#tag-list');
-    
+
     [tags_cache, encrypted] = await Promise.all([
       ipcRenderer.invoke('settings:get', 'tags'),
       ipcRenderer.invoke('settings:get', 'encrypted')
     ]);
-    
+
     while (tag_list.firstChild) {
       tag_list.firstChild.remove();
     }
@@ -844,7 +846,7 @@ document.addEventListener('DOMContentLoaded', () => {
     changeLogModal_div.querySelector('.modal-body').innerHTML = md_converter.makeHtml(markdown);
     changeLogModal.show();
   });
-  
+
   updateAccounts();
 
   ipcRenderer.invoke('ready');
