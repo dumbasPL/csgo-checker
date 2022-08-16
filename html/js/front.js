@@ -494,10 +494,10 @@ async function updateAccounts(force = false) {
           showToast('SteamGuard Code copied to clipboard', 'success');
         }
         catch (e) {
-          showToast("An error occured when getting steam guard code", "warning")
+          showToast('An error occured when getting steam guard code', 'danger')
         }
-
       });
+      
       tr.querySelector('.open-pofile').addEventListener('click', e => {
         e.preventDefault();
         shell.openExternal('https://steamcommunity.com/profiles/' + account_cache[login].steamid);
@@ -513,6 +513,7 @@ async function updateAccounts(force = false) {
         }
         updateAccounts();
       });
+      
       tr.querySelector('.delete').addEventListener('click', async e => {
         e.preventDefault();
         if (e.ctrlKey) {
