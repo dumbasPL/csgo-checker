@@ -430,9 +430,7 @@ function updateRow(row, login, account, force) {
 
     row.querySelector('.ban').innerText = account.error ?? formatPenalty(account.penalty_reason ?? '?', account.penalty_seconds ?? -1)
 
-    if (!account.sharedSecret) {
-      row.querySelector(".copy-steamguard").style.display = "none"
-    }
+    row.querySelector(".copy-steamguard").style.display = account.sharedSecret ? 'initial' : 'none';
 
     let dis = account.steamid ? 'inline-block' : 'none';
     row.querySelector('.copy-code').style.display = dis;
