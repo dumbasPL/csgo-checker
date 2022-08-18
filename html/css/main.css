@@ -55,6 +55,10 @@ main {
   padding-right: 0 !important;
 }
 
+.actions {
+  text-align: right;
+}
+
 #main-table th {
   border-bottom: 0;
   position: sticky;
