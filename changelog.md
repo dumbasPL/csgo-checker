@@ -1,3 +1,6 @@
+# 1.3.0
+  - added copy steam guard code button (thanks @TheEnderOfficial)
+
 # 1.2.0
   - updated to electron 16
   - updated dependencies
