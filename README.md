@@ -1,5 +1,5 @@
-# CS:GO account checker
-<img width="64" alt="icon" src="https://github.com/dumbasPL/csgo-checker/raw/master/build/icon.ico" /> 
+# CS:GO account checker <img width="100" align="right" alt="icon" src="https://github.com/dumbasPL/csgo-checker/raw/master/build/icon.ico" /> 
+
 
 [![Github All Releases](https://img.shields.io/github/downloads/dumbasPL/csgo-checker/total.svg?style=for-the-badge)](https://github.com/dumbasPL/csgo-checker/releases/latest)
 
