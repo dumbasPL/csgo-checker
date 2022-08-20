@@ -72,6 +72,40 @@ function getRankName(rank, wins) {
 }
 
 /**
+ * Get danger zone rank name for given rank id
+ * @param {Number} rank ranking
+ * @param {Number} wins number of wins
+ * @returns {String} rank name
+ */
+ function getDZRankName(rank, wins) {
+  if (rank <= 0) {
+    rank = 0;
+  }
+  switch (rank) {
+    case 0:
+      if (wins >= 1) {
+        return "Expired or Unranked";
+      }
+      return "Unranked";
+    case 1: return "Lab Rat I";
+    case 2: return "Lab Rat II";
+    case 3: return "Sprinting Hare I";
+    case 4: return "Sprinting Hare II";
+    case 5: return "Wild Scout I";
+    case 6: return "Wild Scout II";
+    case 7: return "Wild Scout Elite";
+    case 8: return "Hunter Fox I";
+    case 9: return "Hunter Fox II";
+    case 10: return "Hunter Fox Elite";
+    case 11: return "Timber Wolf";
+    case 12: return "Ember Wolf";
+    case 13: return "Wildfire Wolf";
+    case 14: return "The Howling Alpha";
+    default: return `Unknown(${rank})`;
+  }
+}
+
+/**
  * Format countdown string
  * @param {Number} seconds seconds remaining
  * @returns formatted string
@@ -237,7 +271,7 @@ function execSearch(q, login, account) {
   strings.push(account.steamid ? "" + account.steamid : null)
   strings.push(getRankName(account.rank ?? 0, account.wins ?? 0));
   strings.push(getRankName(account.rank_wg ?? 0, account.wins_wg ?? 0));
-  strings.push(getRankName(account.rank_dz ?? 0, account.wins_dz ?? 0));
+  strings.push(getDZRankName(account.rank_dz ?? 0, account.wins_dz ?? 0));
 
   return q.toLowerCase().split(' ').map(x => {
     return strings.find(v => v && v.toLowerCase().includes(x)) != undefined
@@ -420,7 +454,7 @@ function updateRow(row, login, account, force) {
       '<br>' + (account.wins < 0 ? '?' : account.wins ?? '?') + ' wins' + mm_expire;
     row.querySelector('.rank .wg').title = getRankName(account.rank_wg ?? 0, account.wins_wg ?? 0) +
       '<br>' + (account.wins_wg ?? '?') + ' wins' + wg_expire;
-    row.querySelector('.rank .dz').title = getRankName(account.rank_dz ?? 0, account.wins_dz ?? 0) +
+    row.querySelector('.rank .dz').title = getDZRankName(account.rank_dz ?? 0, account.wins_dz ?? 0) +
       '<br>' + (account.wins_dz ?? '?') + ' wins' + dz_expire;
 
 
