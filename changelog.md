@@ -1,23 +1,26 @@
+# 1.3.1
+ - fixed danger zone rank names (thanks @TheEnderOfficial)
+
 # 1.3.0
-  - added copy steam guard code button (thanks @TheEnderOfficial)
+ - added copy steam guard code button (thanks @TheEnderOfficial)
 
 # 1.2.0
-  - updated to electron 16
-  - updated dependencies
-  - added portable version
+ - updated to electron 16
+ - updated dependencies
+ - added portable version
 
 # 1.1.2
-  - fixed auto updater
+ - fixed auto updater
 
 # 1.1.1
-  - fixed sorting algorithm causing changes to account data
+ - fixed sorting algorithm causing changes to account data
 
 # 1.1.0
-  - added support for shared secrets ([#5](https://github.com/dumbasPL/csgo-checker/issues/5))
-  - added new cooldown reason `Reports (Grief)`
-  - added encryption (can be enabled in settings)
-  - search and sorting now updates correctly when account data changes ([#6](https://github.com/dumbasPL/csgo-checker/issues/6))
-  - fixed tooltips not disappearing after deleting account without confirmation
+ - added support for shared secrets ([#5](https://github.com/dumbasPL/csgo-checker/issues/5))
+ - added new cooldown reason `Reports (Grief)`
+ - added encryption (can be enabled in settings)
+ - search and sorting now updates correctly when account data changes ([#6](https://github.com/dumbasPL/csgo-checker/issues/6))
+ - fixed tooltips not disappearing after deleting account without confirmation
 
 # 1.0.2
  - fixed tags not being saved when adding new account
