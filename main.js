@@ -19,6 +19,12 @@ const Protos = require('./helpers/protos.js')([{
     ]
 }]);
 
+const browserWindowOptions = {};
+
+if (process.platform === "linux") {
+    browserWindowOptions.icon = path.join(`${__dirname}/icons/icon.png`);
+}
+
 const IS_PORTABLE = process.env.PORTABLE_EXECUTABLE_DIR != null;
 const USER_DATA = IS_PORTABLE ? path.join(process.env.PORTABLE_EXECUTABLE_DIR, process.env.PORTABLE_EXECUTABLE_APP_FILENAME + '-data') : app.getPath('userData');
 const SETTINGS_PATH = path.join(USER_DATA, 'settings.json');
@@ -72,6 +78,7 @@ async function openDB() {
                 let pass = await new Promise((resolve, reject) => {
                     passwordPromptResponse = null;
                     let promptWindow = new BrowserWindow({
+                        ...browserWindowOptions,
                         webPreferences: {
                             preload: path.join(__dirname, 'preload.js'),
                             contextIsolation: true,
@@ -162,6 +169,7 @@ var mainWindowCreated = false;
 function createWindow () {
 
     win = new BrowserWindow({
+        ...browserWindowOptions,
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
             contextIsolation: true,
@@ -225,6 +233,7 @@ ipcMain.handle('encryption:setup', async () => {
     let pass = await new Promise((resolve, reject) => {
         passwordPromptResponse = null;
         let promptWindow = new BrowserWindow({
+            ...browserWindowOptions,
             parent: win,
             modal: true,
             webPreferences: {
@@ -290,6 +299,7 @@ ipcMain.handle('encryption:remove', async () => {
         let pass = await new Promise((resolve, reject) => {
             passwordPromptResponse = null;
             let promptWindow = new BrowserWindow({
+                ...browserWindowOptions,
                 parent: win,
                 modal: true,
                 webPreferences: {
