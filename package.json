@@ -47,6 +47,7 @@
       "artifactName": "${name}_${arch}-${version}.${ext}",
       "synopsis": "CS:GO account checker",
       "category": "Utility",
+      "maintainer": "nezu <nezu@nezu.cc>",
       "target": [
         "AppImage",
         "flatpak",
