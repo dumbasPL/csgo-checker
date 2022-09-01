@@ -6,6 +6,8 @@
   "scripts": {
     "start": "electron .",
     "build": "electron-builder --win --linux",
+    "build:windows": "electron-builder --win",
+    "build:linux": "electron-builder --linux",
     "publish": "electron-builder --win --linux --publish always"
   },
   "author": "dumbasPL",
@@ -42,10 +44,14 @@
       "artifactName": "csgo-checker_portable.${ext}"
     },
     "linux": {
+      "artifactName": "${name}_${arch}-${version}.${ext}",
       "synopsis": "CS:GO account checker",
       "category": "Utility",
       "target": [
-        "AppImage"
+        "AppImage",
+        "flatpak",
+        "tar.gz",
+        "deb"
       ]
     },
     "publish": [
