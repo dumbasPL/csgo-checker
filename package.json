@@ -1,12 +1,14 @@
 {
   "name": "csgo-checker",
-  "version": "1.3.1",
-  "description": "csgo-checker",
+  "version": "1.4.0",
+  "description": "Check CS:GO accounts for bans/cooldowns/wins/ranks",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "build": "electron-builder --win",
-    "publish": "electron-builder --win --publish always"
+    "build": "electron-builder --win --linux",
+    "build:windows": "electron-builder --win",
+    "build:linux": "electron-builder --linux",
+    "publish": "electron-builder --win --linux --publish always"
   },
   "author": "dumbasPL",
   "license": "GPL-3.0-or-later",
@@ -14,19 +16,19 @@
     "csgo-friendcode": "^3.0.3",
     "electron-is-dev": "^2.0.0",
     "electron-reload": "^1.5.0",
-    "electron-updater": "^4.6.5",
+    "electron-updater": "^5.2.1",
     "fast-deep-equal": "^3.1.3",
     "got": "^11.8.5",
     "pbkdf2": "^3.1.2",
     "protobufjs": "^6.11.3",
-    "showdown": "^1.9.1",
-    "simple-json-db": "^1.3.0",
+    "showdown": "^2.1.0",
+    "simple-json-db": "^2.0.0",
     "steam-totp": "^2.1.2",
     "steam-user": "^4.24.6"
   },
   "devDependencies": {
     "electron": "^16.2.8",
-    "electron-builder": "^22.14.13"
+    "electron-builder": "^23.3.3"
   },
   "build": {
     "appId": "cc.nezu.csgochecker",
@@ -39,7 +41,19 @@
       ]
     },
     "portable": {
-      "artifactName": "csgo-checker_portable.exe"
+      "artifactName": "csgo-checker_portable.${ext}"
+    },
+    "linux": {
+      "artifactName": "${name}_${arch}-${version}.${ext}",
+      "synopsis": "CS:GO account checker",
+      "category": "Utility",
+      "maintainer": "nezu <nezu@nezu.cc>",
+      "target": [
+        "AppImage",
+        "flatpak",
+        "tar.gz",
+        "deb"
+      ]
     },
     "publish": [
       {

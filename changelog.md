@@ -1,3 +1,6 @@
+# 1.4.0
+ - added linux support
+
 # 1.3.1
  - fixed danger zone rank names (thanks @TheEnderOfficial)
 

@@ -508,13 +508,13 @@ async function updateAccounts(force = false) {
     let row = FindOrCreateRow(login, tr => {
       tr.querySelector('.copy-code').addEventListener('click', e => {
         e.preventDefault();
-        clipboard.writeText(friendCode.encode(account_cache[login].steamid), 'selection');
+        clipboard.writeText(friendCode.encode(account_cache[login].steamid), 'clipboard');
         showToast('Code copied to clipboard', 'success');
       });
 
       tr.querySelector('.copy-passwd').addEventListener('click', e => {
         e.preventDefault();
-        clipboard.writeText(account_cache[login].password, 'selection');
+        clipboard.writeText(account_cache[login].password, 'clipboard');
         showToast('Password copied to clipboard', 'success');
       });
 
@@ -522,7 +522,7 @@ async function updateAccounts(force = false) {
         e.preventDefault();
         try {
           let code = await ipcRenderer.invoke('steamtotp', { secret: account_cache[login].sharedSecret });
-          clipboard.writeText(code, 'selection');
+          clipboard.writeText(code, 'clipboard');
           showToast('SteamGuard Code copied to clipboard', 'success');
         }
         catch (e) {
