@@ -17,6 +17,7 @@
  - mass refresh
  - copy password to clipboard
  - copy CS:GO friend code to clipboard
+ - copy mobile steam 2fa code to clipboard (requires shared secret to be set)
  - search bar
  - tags
  - sorting
