@@ -3,7 +3,7 @@ const { autoUpdater } = require('electron-updater');
 const isDev = require('electron-is-dev');
 const EncryptedStorage = require('./EncryptedStorage.js');
 let JSONdb = require('simple-json-db');
-const got = require('got');
+const axios = require('axios').default;
 const User = require('steam-user');
 const SteamTotp = require('steam-totp');
 const fs = require('fs');
@@ -549,16 +549,16 @@ function check_account(username, pass, sharedSecret) {
             }
         });
 
-        steamClient.on('webSession', (sessionID, cookies ) => {
+        steamClient.on('webSession', (sessionID, cookies) => {
             sleep(1000).then(() => {
-                got(`https://steamcommunity.com/profiles/${steamClient.steamID.getSteamID64()}/gcpd/730?tab=matchmaking`, {
+                axios.get(`https://steamcommunity.com/profiles/${steamClient.steamID.getSteamID64()}/gcpd/730?tab=matchmaking`, {
                     headers: {
                         'Cookie': cookies.join('; ') + ';'
-                    }
+                    },
                 }).then(res => {
-                    let mm = /<td>Competitive<\/td><td>\d+<\/td><td>\d+<\/td><td>\d+<\/td><td>\d+<\/td><td>(\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d GMT)<\/td>/.exec(res.body);
-                    let wg = /<td>Wingman<\/td><td>\d+<\/td><td>\d+<\/td><td>\d+<\/td><td>\d+<\/td><td>(\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d GMT)<\/td>/.exec(res.body);
-                    let dz = /<td>Danger Zone<\/td><td>\d+<\/td><td>\d+<\/td><td>\d+<\/td><td>(\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d GMT)<\/td>/.exec(res.body);
+                    let mm = /<td>Competitive<\/td><td>\d+<\/td><td>\d+<\/td><td>\d+<\/td><td>\d+<\/td><td>(\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d GMT)<\/td>/.exec(res.data);
+                    let wg = /<td>Wingman<\/td><td>\d+<\/td><td>\d+<\/td><td>\d+<\/td><td>\d+<\/td><td>(\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d GMT)<\/td>/.exec(res.data);
+                    let dz = /<td>Danger Zone<\/td><td>\d+<\/td><td>\d+<\/td><td>\d+<\/td><td>(\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d GMT)<\/td>/.exec(res.data);
 
                     if (mm) {
                         data.last_game = new Date(mm[1]);
