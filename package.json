@@ -1,6 +1,6 @@
 {
   "name": "csgo-checker",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "Check CS:GO accounts for bans/cooldowns/wins/ranks",
   "main": "main.js",
   "scripts": {

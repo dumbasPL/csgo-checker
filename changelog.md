@@ -1,3 +1,7 @@
+# 1.4.1
+ - updated to electron 22
+ - updated dependencies
+
 # 1.4.0
  - added linux support
 
