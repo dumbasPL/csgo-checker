@@ -19,7 +19,13 @@ const Protos = require('./helpers/protos.js')([{
     ]
 }]);
 
-const browserWindowOptions = {};
+const browserWindowOptions = {
+    webPreferences: {
+        preload: path.join(__dirname, 'preload.js'),
+        contextIsolation: true,
+        sandbox: false,
+    },
+};
 
 if (process.platform === "linux") {
     browserWindowOptions.icon = path.join(`${__dirname}/icons/icon.png`);
@@ -79,10 +85,6 @@ async function openDB() {
                     passwordPromptResponse = null;
                     let promptWindow = new BrowserWindow({
                         ...browserWindowOptions,
-                        webPreferences: {
-                            preload: path.join(__dirname, 'preload.js'),
-                            contextIsolation: true,
-                        },
                         width: 500,
                         height: 280,
                         resizable: false,
@@ -170,10 +172,7 @@ function createWindow () {
 
     win = new BrowserWindow({
         ...browserWindowOptions,
-        webPreferences: {
-            preload: path.join(__dirname, 'preload.js'),
-            contextIsolation: true,
-        },
+        
         width: 1100,
         height: 650,
         minWidth: 1100,
@@ -236,10 +235,6 @@ ipcMain.handle('encryption:setup', async () => {
             ...browserWindowOptions,
             parent: win,
             modal: true,
-            webPreferences: {
-                preload: path.join(__dirname, 'preload.js'),
-                contextIsolation: true,
-            },
             width: 500,
             height: 375,
             resizable: false,
@@ -302,10 +297,6 @@ ipcMain.handle('encryption:remove', async () => {
                 ...browserWindowOptions,
                 parent: win,
                 modal: true,
-                webPreferences: {
-                    preload: path.join(__dirname, 'preload.js'),
-                    contextIsolation: true,
-                },
                 width: 500,
                 height: 280,
                 resizable: false,
