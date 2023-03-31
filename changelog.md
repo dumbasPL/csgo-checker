@@ -1,3 +1,6 @@
+# 1.4.2
+- fix accounts failing to load when using encryption
+
 # 1.4.1
  - updated to electron 22
  - updated dependencies
