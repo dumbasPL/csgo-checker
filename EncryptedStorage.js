@@ -12,7 +12,9 @@ const PASSWORD_KEY_SIZE = 32;
 const defaultOptions = {
   asyncWrite: false,
   syncOnWrite: true,
-  jsonSpaces: 4
+  jsonSpaces: 4,
+  stringify: JSON.stringify,
+  parse: JSON.parse
 };
 
 function pbkdf2(password, salt, rounds, bits) {
