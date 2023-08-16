@@ -1,3 +1,8 @@
+# 1.4.3
+- updated to the new steam authentication method (this fixes [#30](https://github.com/dumbasPL/csgo-checker/issues/30))
+- updated to electron 25
+- dropped Windows 7/8/8.1 support
+
 # 1.4.2
 - fix accounts failing to load when using encryption
 
