@@ -103,6 +103,9 @@ async function openDB() {
                         resolve(passwordPromptResponse);
                         promptWindow = null;
                     })
+                    promptWindow.webContents.on('render-process-gone', (event, detailed) => {
+                      console.error("render crashed, reason: " + detailed.reason + ", exitCode = " + detailed.exitCode)
+                    });
                 });
                 try {
                     if (pass == null || pass.length == 0) {
@@ -202,6 +205,9 @@ function createWindow () {
             autoUpdater.checkForUpdates();
         }
     });
+    promptWindow.webContents.on('render-process-gone', (event, detailed) => {
+      console.error("render crashed, reason: " + detailed.reason + ", exitCode = " + detailed.exitCode)
+    });
 
     mainWindowCreated = true;
 }
@@ -251,6 +257,9 @@ ipcMain.handle('encryption:setup', async () => {
             resolve(passwordPromptResponse);
             promptWindow = null;
         })
+        promptWindow.webContents.on('render-process-gone', (event, detailed) => {
+          console.error("render crashed, reason: " + detailed.reason + ", exitCode = " + detailed.exitCode)
+        });
     });
     if (pass == null) { //no data submitted
         return false;
@@ -315,6 +324,9 @@ ipcMain.handle('encryption:remove', async () => {
                 resolve(passwordPromptResponse);
                 promptWindow = null;
             })
+            promptWindow.webContents.on('render-process-gone', (event, detailed) => {
+              console.error("render crashed, reason: " + detailed.reason + ", exitCode = " + detailed.exitCode)
+            });
         });
         if (pass == null) { //no data submitted
             return true; //true is fail as we are still encrypted
@@ -680,3 +692,7 @@ function check_account(username, pass, sharedSecret) {
         });
     });    
 }
+
+process.on('uncaughtException', err => {
+  console.error('uncaughtException', err);
+})
