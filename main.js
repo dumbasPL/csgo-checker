@@ -205,7 +205,7 @@ function createWindow () {
             autoUpdater.checkForUpdates();
         }
     });
-    promptWindow.webContents.on('render-process-gone', (event, detailed) => {
+    win.webContents.on('render-process-gone', (event, detailed) => {
       console.error("render crashed, reason: " + detailed.reason + ", exitCode = " + detailed.exitCode)
     });
 

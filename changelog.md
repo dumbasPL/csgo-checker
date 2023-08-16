@@ -1,3 +1,6 @@
+# 1.4.4
+- bug fixes
+
 # 1.4.3
 - updated to the new steam authentication method (this fixes [#30](https://github.com/dumbasPL/csgo-checker/issues/30))
 - updated to electron 25
