@@ -28,7 +28,7 @@
   },
   "devDependencies": {
     "electron": "^25.8.4",
-    "electron-builder": "^24.6.3"
+    "electron-builder": "^24.13.3"
   },
   "build": {
     "appId": "cc.nezu.csgochecker",
