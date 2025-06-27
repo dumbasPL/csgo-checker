@@ -19,7 +19,7 @@
     "electron-reload": "^1.5.0",
     "electron-updater": "^6.1.1",
     "fast-deep-equal": "^3.1.3",
-    "pbkdf2": "^3.1.2",
+    "pbkdf2": "^3.1.3",
     "protobufjs": "^6.11.4",
     "showdown": "^2.1.0",
     "simple-json-db": "^2.0.0",
